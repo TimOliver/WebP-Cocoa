@@ -37,10 +37,15 @@ mkdir -p build
 cd build
 
 # Global Valuess
-readonly TAG_VERSION="v1.1.0"
 readonly WEBP_GIT_URL="https://chromium.googlesource.com/webm/libwebp"
 readonly WEBP_SRC_DIR="libwebp"
 readonly TOPDIR=$(pwd)
+
+# Read the tag from ENV, or default to a manually specified one
+TAG_VERSION="v1.1.0"
+if [[ ! -z ${WEBP_TAG_VERSION} ]]; then
+  TAG_VERSION=${WEBP_TAG_VERSION}
+fi
 
 # Extract Xcode version.
 readonly XCODE=$(xcodebuild -version | grep Xcode | cut -d " " -f2)

@@ -80,13 +80,17 @@ EOF
 
 # Clone a fresh copy of the libwep source code
 clone_repo() {
-    # Clone a copy of the WebP source code
-    if [[ ! -d ${WEBP_SRC_DIR} ]]; then
-        git clone --depth 1 --branch ${TAG_VERSION} ${WEBP_GIT_URL}
-    fi
 
-    # Move to the directory
-    cd ${WEBP_SRC_DIR}
+  # Delete any previous copies of the repo
+  rm -rf ${WEBP_SRC_DIR}
+
+  # Clone a copy of the WebP source code
+  if [[ ! -d ${WEBP_SRC_DIR} ]]; then
+      git clone --depth 1 --branch ${TAG_VERSION} ${WEBP_GIT_URL}
+  fi
+
+  # Move to the directory
+  cd ${WEBP_SRC_DIR}
 }
 
 build_ios() {

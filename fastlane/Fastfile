@@ -1,0 +1,63 @@
+update_fastlane
+
+desc "Build, package and upload all of the WebP framework binaries"
+lane :package do |options|
+  tag = options[:tag]
+
+  # Get the tag for the version we want to build
+  if tag
+    ENV["WEBP_TAG_VERSION"] = tag
+  else
+    UI.user_error!("No tag specified. Please specify a libwebp repo tag to target.")
+  end
+
+  # Go up one to the main directory
+  Dir.chdir ".."
+
+  # Build the binaries
+  UI.message "Building binaries..."
+  #sh "sh build.sh build"
+  UI.success "... done!"
+
+  # Package up the main bundle
+  UI.message "Building main package"
+  sh "sh build.sh package-all"
+  UI.success "...done!"
+
+  # Get path of main package
+  files = Dir["build/*.zip"]
+
+  # Package up all of the platform frameworks
+  UI.message "Building platform packages"
+  sh "sh build.sh package-platform"
+  UI.success "...done!"
+
+  # Get the list of platform files, and remove the main one
+  platform_files = Dir["build/*.zip"].sort
+  platform_files.delete(files)
+  files.append(platform_files)
+
+  # Package up all of the separate frameworks
+  UI.message "Building all separate packages"
+  sh "sh build.sh package-each"
+  UI.success "...done!"
+
+  # Get the remaining files and add them to the list
+  separate_files = Dir["build/*.zip"].sort
+  separate_files.delete(files)
+  files.append(separate_files)
+
+  # Cut a new release on GitHub Releases
+  UI.message "Uploading to GitHub Releases"
+  Dir.chdir "build" 
+  set_github_release(
+    repository_name: "TimOliver/WebP-Cocoa",
+    api_token: ENV["API_TOKEN"],
+    name: tag,
+    tag_name: tag,
+    description: "",
+    commitish: "main",
+    upload_assets: files
+  )
+  UI.success "...done!"
+end

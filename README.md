@@ -16,7 +16,7 @@
 * [WebPDemux.xcframework]()
 * [WebPMux.xcframework]()
 
-# iOS
+## iOS
 
 **Architectures:** arm64, armv7, armv7s, i386, x86_64<br/>
 **Supported Versions:** iOS 9.0 and up<br/>
@@ -28,7 +28,7 @@
 * [WebPDemux.xcframework]()
 * [WebPMux.xcframework]()
 
-# tvOS
+## tvOS
 
 **Architectures:** arm64, x86_64<br/>
 **Supported Versions:** tvOS 9.0 and up<br/>
@@ -40,7 +40,7 @@
 * [WebPDemux.xcframework]()
 * [WebPMux.xcframework]()
 
-# watchOS
+## watchOS
 
 **Architectures:** arm64_32, armv7k, i386, x86_64<br/>
 **Supported Versions:** watchOS 2.0 and up<br/>

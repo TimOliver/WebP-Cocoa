@@ -25,7 +25,7 @@ There are 4 separate frameworks available for each platform:
  
  For ultimate convenience, the pre-built frameworks have been packaged up into every combination of ZIP archives. Simply click one of the links below to begin downloading.
  
- [Download All Frameworks]()
+ [Download All Frameworks](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip)
  
 ## iOS (Including Mac Catalyst)
 
@@ -33,11 +33,11 @@ There are 4 separate frameworks available for each platform:
 **Supported Versions:** iOS 11.0, macOS 10.15<br/>
 **Technical Requirements:** Xcode 11 and up
 
-* [All iOS Frameworks]()
-* [WebP.xcframework]()
-* [WebPDecoder.xcframework]()
-* [WebPDemux.xcframework]()
-* [WebPMux.xcframework]()
+* [All iOS Frameworks](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst.zip)
+* [WebP.xcframework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webp.zip)
+* [WebPDecoder.xcframework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webpdecoder.zip)
+* [WebPDemux.xcframework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webpdemux.zip)
+* [WebPMux.xcframework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webpmux.zip)
 
 ## iOS
 
@@ -45,11 +45,11 @@ There are 4 separate frameworks available for each platform:
 **Supported Versions:** iOS 9.0 and up<br/>
 **Technical Requirements:** Xcode 7 and up
 
-* [All iOS Frameworks]()
-* [WebP.xcframework]()
-* [WebPDecoder.xcframework]()
-* [WebPDemux.xcframework]()
-* [WebPMux.xcframework]()
+* [All iOS Frameworks](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios.zip)
+* [WebP.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webp.zip)
+* [WebPDecoder.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webpdecoder.zip)
+* [WebPDemux.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webpdemux.zip)
+* [WebPMux.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webpmux.zip)
 
 ## tvOS
 
@@ -57,11 +57,11 @@ There are 4 separate frameworks available for each platform:
 **Supported Versions:** tvOS 9.0 and up<br/>
 **Technical Requirements:** Xcode 7 and up
 
-* [All tvOS Frameworks]()
-* [WebP.xcframework]()
-* [WebPDecoder.xcframework]()
-* [WebPDemux.xcframework]()
-* [WebPMux.xcframework]()
+* [All tvOS Frameworks](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos.zip)
+* [WebP.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webp.zip)
+* [WebPDecoder.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webpdecoder.zip)
+* [WebPDemux.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webpdemux.zip)
+* [WebPMux.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webpmux.zip)
 
 ## watchOS
 
@@ -69,16 +69,16 @@ There are 4 separate frameworks available for each platform:
 **Supported Versions:** watchOS 2.0 and up<br/>
 **Technical Requirements:** Xcode 7 and up
 
-* [All watchOS Frameworks]()
-* [WebP.xcframework]()
-* [WebPDecoder.xcframework]()
-* [WebPDemux.xcframework]()
-* [WebPMux.xcframework]()
+* [All watchOS Frameworks](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos.zip)
+* [WebP.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webp.zip)
+* [WebPDecoder.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webpdecoder.zip)
+* [WebPDemux.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webpdemux.zip)
+* [WebPMux.framework](https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webpmux.zip)
 
 # Credits
 
-Repository created and maintained by [Tim Oliver](http://twitter.com/TimOliverAU)
+Repository created and maintained by [Tim Oliver](http://twitter.com/TimOliverAU). WebP icon artwork by [Simo99](https://commons.wikimedia.org/wiki/User:Simo99) used under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/). WebP is developed by [Google](http://about.google).
 
-WebP icon artwork by [Simo99](https://commons.wikimedia.org/wiki/User:Simo99) used under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
+# License
 
-WebP is developed by [Google](http://about.google).
+All code in this repository is under the BSD-3-Clause License. Please see the [LICENSE](LICENSE) file for more information.

@@ -1,2 +1,3 @@
-# WebP-Cocoa
-An unofficial collection of the `libwebp` binaries compiled for all of Apple's current platforms
+<p align="center">
+  <img src="https://github.com/TimOliver/WebP-Cocoa/raw/main/banner.png" width="850" alt="WebP-Cocoa Banner" />
+</p>

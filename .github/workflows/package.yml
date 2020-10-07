@@ -17,6 +17,11 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      # Install MacPorts so we can compile C libraries
+      - name: MacPorts
+        uses: keepitsimpletech/actions/setup-macports@setup-macports/releases/v1
+
+
       # Check out the repo with our CI bot's credentials
       - name: Check out WebP-Cococa
         uses: actions/checkout@v2

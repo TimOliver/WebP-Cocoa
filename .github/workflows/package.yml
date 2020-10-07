@@ -26,4 +26,6 @@ jobs:
       # Execute fastlane
       - name: Run Fastlane
         run: bundle install && bundle exec fastlane package tag:${{ github.event.inputs.version }}
+        env:
+          API_TOKEN: ${{ secrets.API_TOKEN }}
 

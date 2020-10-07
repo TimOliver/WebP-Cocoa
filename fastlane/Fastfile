@@ -9,6 +9,11 @@ lane :package do |options|
     UI.user_error!("No tag specified. Please specify a libwebp repo tag to target.")
   end
 
+  # Verify we haven't shipped this tag before
+  if git_tag_exists(tag: tag)
+    UI.user_error!("Tag #{tag} already exists! Please use a different one.")
+  end
+
   # Go up one to the main directory
   Dir.chdir ".."
 
@@ -54,9 +59,13 @@ lane :package do |options|
   File.write("../README.md", readme_text)
 
   # Commit the new README to GitHub
-  git_commit(path: "README.md", message: "Created Release " + tag)
-  push_to_git_remote
-
+  begin
+    git_commit(path: "README.md", message: "Created Release " + tag)
+    push_to_git_remote
+  rescue => ex
+    UI.error(ex)
+  end
+  
   # Cut a new release on GitHub Releases
   UI.message "Uploading to GitHub Releases"
   set_github_release(

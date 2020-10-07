@@ -28,9 +28,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
 <table>
     <tr>
         <td colspan="4" align="center">
-            <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip">
-                <strong>Download All Frameworks for All Platforms (ZIP)</strong>
-            </a>
+            <h3><a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip">Download All Frameworks for All Platforms (ZIP)</a></h3>
         </td>
     </tr>
     <tr>

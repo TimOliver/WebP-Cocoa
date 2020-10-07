@@ -14,12 +14,13 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    # Explicity set Catalina as MacPorts will depend on it
+    runs-on: macos-10.15
 
     steps:
       # Install MacPorts so we can compile C libraries
       - name: MacPorts
-        uses: keepitsimpletech/actions/setup-macports@setup-macports/releases/v1
+        uses: timoliver/actions/setup-macports@setup-macports/releases/v1
 
 
       # Check out the repo with our CI bot's credentials

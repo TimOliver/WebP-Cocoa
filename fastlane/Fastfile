@@ -1,5 +1,3 @@
-update_fastlane
-
 desc "Build, package and upload all of the WebP framework binaries"
 lane :package do |options|
   tag = options[:tag]
@@ -60,4 +58,13 @@ lane :package do |options|
     upload_assets: files
   )
   UI.success "...done!"
+
+  # Update the README with the links to the new version
+  readme_text = File.read("../templates/README.md")
+  readme_text = readme_text.gsub("{tag_version}", tag)
+  File.write("../README.md", readme_text)
+
+  # Commit the new README to GitHub
+  git_commit(path: "README.md", message: "Updated download links in README.md")
+  push_to_git_remote
 end

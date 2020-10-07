@@ -45,6 +45,9 @@ lane :package do |options|
   separate_files.delete(files)
   files.append(separate_files)
 
+  # Move to the build artifacts directory
+  Dir.chdir "build"  
+
   # Update the README with the links to the new version
   readme_text = File.read("../templates/README.md")
   readme_text = readme_text.gsub("{tag_version}", tag)
@@ -56,7 +59,6 @@ lane :package do |options|
 
   # Cut a new release on GitHub Releases
   UI.message "Uploading to GitHub Releases"
-  Dir.chdir "build" 
   set_github_release(
     repository_name: "TimOliver/WebP-Cocoa",
     api_token: ENV["API_TOKEN"],

@@ -20,7 +20,7 @@ jobs:
     steps:
       # Install MacPorts so we can compile C libraries
       - name: Install CL Tools
-        run: pwed && sh cltools.sh
+        run: pwd && sh cltools.sh
 
       # Check out the repo with our CI bot's credentials
       - name: Check out WebP-Cococa

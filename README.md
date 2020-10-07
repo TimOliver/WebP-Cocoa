@@ -45,7 +45,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
             <ul>
                 <li><code>arm64</code></li>
                 <li><code>x86_64</code> (Mac Catalyst)</li>
-                <li><code>x86_64</code> (iOS Simulator)</li>
+                <li><code>x86_64</code> (Simulator)</li>
             </ul>
         </td>
         <td>

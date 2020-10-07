@@ -18,15 +18,15 @@ jobs:
     runs-on: macos-10.15
 
     steps:
-      # Install MacPorts so we can compile C libraries
-      - name: Install CL Tools
-        run: pwd && ls && sh cltools.sh
-
       # Check out the repo with our CI bot's credentials
       - name: Check out WebP-Cococa
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.API_TOKEN }}
+
+      # Install MacPorts so we can compile C libraries
+      - name: Install CL Tools
+        run: pwd && ls && sh cltools.sh
 
       # Execute fastlane
       - name: Run Fastlane

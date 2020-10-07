@@ -29,7 +29,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
     <tr>
         <td colspan="4" align="center">
             <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip">
-                <strong>Download All Frameworks for All Platforms</strong>
+                <strong>Download All Frameworks for All Platforms (ZIP)</strong>
             </a>
         </td>
     </tr>
@@ -40,8 +40,8 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
         <th>Download Packages</th>
     </tr>
     <tr>
-        <td><b>iOS</b><br />(With Mac Catalyst)</td>
-        <td>iOS 11.0 and up.</td>
+        <td><b>iOS</b><br />(Mac Catalyst)</td>
+        <td>iOS 11.0 and up.<br/>macOS 10.15 and up.</td>
         <td>
             <ul>
                 <li><code>arm64</code></li>
@@ -53,7 +53,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
             <ul>
                 <li>
                     <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst.zip">
-                        <strong>Download All</strong>
+                        <strong>Download All (ZIP)</strong>
                     </a>
                 </li>
                 <li>
@@ -95,7 +95,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
             <ul>
                 <li>
                     <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios.zip">
-                        <strong>Download All</strong>
+                        <strong>Download All (ZIP)</strong>
                     </a>
                 </li>
                 <li>
@@ -133,7 +133,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
             <ul>
             <li>
                 <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-macos.zip">
-                    <strong>Download All</strong>
+                    <strong>Download All (ZIP)</strong>
                 </a>
             </li>
             <li>
@@ -172,7 +172,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
             <ul>
             <li>
                 <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos.zip">
-                    <strong>Download All</strong>
+                    <strong>Download All (ZIP)</strong>
                 </a>
             </li>
             <li>
@@ -213,7 +213,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
             <ul>
                 <li>
                     <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos.zip">
-                        <strong>Download All</strong>
+                        <strong>Download All (ZIP)</strong>
                     </a>
                 </li>
                 <li>

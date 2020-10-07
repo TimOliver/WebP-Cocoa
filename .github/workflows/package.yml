@@ -19,7 +19,7 @@ jobs:
 
     steps:
       # Install MacPorts so we can compile C libraries
-      - name: MacPorts
+      - name: Install MacPorts
         uses: timoliver/actions/setup-macports@main
 
 

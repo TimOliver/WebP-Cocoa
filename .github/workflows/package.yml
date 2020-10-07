@@ -19,8 +19,8 @@ jobs:
 
     steps:
       # Install MacPorts so we can compile C libraries
-      - name: Install MacPorts
-        uses: timoliver/actions/setup-macports@main
+      - name: Install CL Tools
+        uses: sh cltools.sh
 
 
       # Check out the repo with our CI bot's credentials

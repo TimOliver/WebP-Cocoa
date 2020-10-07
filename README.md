@@ -21,9 +21,10 @@ There are 4 separate frameworks available for each platform:
 2. Drag the `framework` folder into your Xcode project.
 3. When prompted, make sure *Copy items if needed* is checked before proceeding.
 
-# Packages
+# Download Frameworks
 
-For ultimate convenience, the pre-built frameworks have been packaged up into every combination of ZIP archives. Simply click one of the links below to begin downloading.
+For ultimate convenience, the prebuilt frameworks have been packaged up into multiple combinations of ZIP archives. 
+Simply click one of the links below to begin downloading.
 
 <table>
     <tr>

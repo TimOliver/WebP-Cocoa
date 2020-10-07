@@ -40,7 +40,7 @@ For ultimate convenience, the pre-built frameworks have been packaged up into ev
     </tr>
     <tr>
         <td><b>iOS</b><br />(With Mac Catalyst)</td>
-        <td>iOS 11.0 and up.<br/>macOS 10.15 and up.</td>
+        <td>iOS 11.0 and up.</td>
         <td>
             <ul>
                 <li><code>arm64</code></li>

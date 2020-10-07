@@ -25,13 +25,14 @@ There are 4 separate frameworks available for each platform:
 
 For ultimate convenience, the pre-built frameworks have been packaged up into every combination of ZIP archives. Simply click one of the links below to begin downloading.
 
-<p align="center">
-    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip">
-        <strong>Download All Frameworks for All Platforms</strong>
-    </a>
-</p>
-
 <table>
+    <tr>
+        <td colspan="4" align="center">
+            <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip">
+                <strong>Download All Frameworks for All Platforms</strong>
+            </a>
+        </td>
+    </tr>
     <tr>
         <th>Platform</th>
         <th>Versions</th>

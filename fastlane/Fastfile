@@ -14,7 +14,7 @@ lane :package do |options|
 
   # Build the binaries
   UI.message "Building binaries..."
-  #sh "sh build.sh build"
+  sh "sh build.sh build"
   UI.success "... done!"
 
   # Package up the main bundle

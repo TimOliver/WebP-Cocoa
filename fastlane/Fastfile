@@ -56,8 +56,8 @@ lane :package do |options|
 
   # Commit the new README to GitHub
   begin
-    git_add(path: "../README.md")
-    git_commit(path: "../README.md", message: "Created Release " + tag)
+    git_add(path: "README.md")
+    git_commit(path: "README.md", message: "Created Release " + tag)
     push_to_git_remote
   rescue => ex
     UI.error(ex)

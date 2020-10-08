@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v2
       
       # Configure git credentials
-      - name: Check out WebP-Cococa
+      - name: Configure git credentials
         uses: fregante/setup-git-token@v1
         with:
           name: XD-CI

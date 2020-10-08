@@ -15,7 +15,7 @@ on:
 jobs:
   build:
     # Explicity set Catalina as MacPorts will depend on it
-    runs-on: macos-10.15
+    runs-on: macos-latest
 
     steps:
       # Check out the repo with our CI bot's credentials

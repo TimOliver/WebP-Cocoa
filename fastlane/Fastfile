@@ -46,17 +46,14 @@ lane :package do |options|
   UI.success "...done!"
 
   # Get the remaining files and add them to the list
-  separate_files = Dir["build/*.zip"].sort
+  separate_files = Dir["../build/*.zip"].sort
   separate_files.delete(files)
   files.append(separate_files)
 
-  # Move to the build artifacts directory
-  Dir.chdir "build"  
-
   # Update the README with the links to the new version
-  readme_text = File.read("../templates/README.md")
+  readme_text = File.read("templates/README.md")
   readme_text = readme_text.gsub("{tag_version}", tag)
-  File.write("../README.md", readme_text)
+  File.write("README.md", readme_text)
 
   # Commit the new README to GitHub
   begin
@@ -66,7 +63,10 @@ lane :package do |options|
   rescue => ex
     UI.error(ex)
   end
-  
+
+  # Move to build dir
+  Dir.chdir "build"
+
   # Cut a new release on GitHub Releases
   UI.message "Uploading to GitHub Releases"
   set_github_release(

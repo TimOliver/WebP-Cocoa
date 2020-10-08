@@ -3,10 +3,8 @@
 ##
 # https://gist.github.com/justinbellamy/2672db1c78f024f2d4fe
 #
-# Install autoconf, automake and libtool smoothly on Mac OS X.
-# Newer versions of these libraries are available and may work better on OS X
-#
-# This script is originally from http://jsdelfino.blogspot.com.au/2012/08/autoconf-and-automake-on-mac-os-x.html
+# Installs autoconf, automake and libtool in order to enable 
+# building open source C libraries from source on macOS.
 #
 
 export build=~/devtools # or wherever you'd like to build

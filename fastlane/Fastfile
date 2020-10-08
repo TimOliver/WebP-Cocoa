@@ -8,18 +8,18 @@ lane :package do |options|
   else
     UI.user_error!("No tag specified. Please specify a libwebp repo tag to target.")
   end
-
-  # Go up one to the main directory
-  Dir.chdir ".."
   
   # Verify we haven't shipped this tag before
   if git_tag_exists(tag: tag)
     UI.user_error!("Tag #{tag} already exists! Please use a different one.")
   end
 
+  # Go up one directory to access the build script
+  sh "cd .." 
+  
   # Build the binaries
   UI.message "Building binaries..."
-  sh "sh build.sh build"
+  sh "sh build.sh tvos"
   UI.success "... done!"
 
   # Package up the main bundle
@@ -28,7 +28,7 @@ lane :package do |options|
   UI.success "...done!"
 
   # Get path of main package
-  files = Dir["build/*.zip"]
+  files = Dir["../build/*.zip"]
 
   # Package up all of the platform frameworks
   UI.message "Building platform packages"
@@ -36,7 +36,7 @@ lane :package do |options|
   UI.success "...done!"
 
   # Get the list of platform files, and remove the main one
-  platform_files = Dir["build/*.zip"].sort
+  platform_files = Dir["../build/*.zip"].sort
   platform_files.delete(files)
   files.append(platform_files)
 
@@ -51,21 +51,18 @@ lane :package do |options|
   files.append(separate_files)
 
   # Update the README with the links to the new version
-  readme_text = File.read("templates/README.md")
+  readme_text = File.read("../templates/README.md")
   readme_text = readme_text.gsub("{tag_version}", tag)
-  File.write("README.md", readme_text)
+  File.write("../README.md", readme_text)
 
   # Commit the new README to GitHub
   begin
-    git_add(path: "README.md")
-    git_commit(path: "README.md", message: "Created Release " + tag)
+    git_add(path: "../README.md")
+    git_commit(path: "../README.md", message: "Created Release " + tag)
     push_to_git_remote
   rescue => ex
     UI.error(ex)
   end
-
-  # Move to build dir
-  Dir.chdir "build"
 
   # Cut a new release on GitHub Releases
   UI.message "Uploading to GitHub Releases"

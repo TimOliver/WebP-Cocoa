@@ -24,27 +24,18 @@ lane :package do |options|
   sh "cd .. && sh build.sh package-all"
   UI.success "...done!"
 
-  # Get path of main package
-  files = Dir["../build/*.zip"].map { |path| File.expand_path(path) }
-
   # Package up all of the platform frameworks
   UI.message "Building platform packages"
   sh "cd .. && sh build.sh package-platform"
   UI.success "...done!"
-
-  # Get the list of platform files, and remove the main one
-  files += Dir["../build/*.zip"].sort.map { |path| File.expand_path(path) }
 
   # Package up all of the separate frameworks
   UI.message "Building all separate packages"
   sh "cd .. && sh build.sh package-each"
   UI.success "...done!"
 
-  # Get the remaining files and add them to the list
-  files += Dir["../build/*.zip"].sort.map { |path| File.expand_path(path) }
-
-  # Remove duplicate entries in files list
-  files = files.uniq
+  # Get all of the files we created
+  files = Dir["../build/*.zip"].map { |path| File.expand_path(path) }
   
   # Update the README with the links to the new version
   readme_text = File.read("../templates/README.md")

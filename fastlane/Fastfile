@@ -13,13 +13,10 @@ lane :package do |options|
   if git_tag_exists(tag: tag)
     UI.user_error!("Tag #{tag} already exists! Please use a different one.")
   end
-
-  # Go up one directory to access the build script
-  sh "cd .." 
   
   # Build the binaries
   UI.message "Building binaries..."
-  sh "sh build.sh tvos"
+  sh "cd .. && sh build.sh tvos"
   UI.success "... done!"
 
   # Package up the main bundle

@@ -21,8 +21,13 @@ jobs:
       # Check out the repo with our CI bot's credentials
       - name: Check out WebP-Cococa
         uses: actions/checkout@v2
-      - uses: fregante/setup-git-token@v1
+      
+      # Configure git credentials
+      - name: Check out WebP-Cococa
+        uses: fregante/setup-git-token@v1
         with:
+          name: XD-CI
+          email: ${{ secrets.CI_EMAIL }}
           token: ${{ secrets.API_TOKEN }}
 
       # Install MacPorts so we can compile C libraries

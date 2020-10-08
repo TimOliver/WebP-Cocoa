@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    # Explicity set Catalina as MacPorts will depend on it
+    # Set the latest version of macOS supported
     runs-on: macos-latest
 
     steps:

@@ -4,9 +4,9 @@
 
 [WebP](https://developers.google.com/speed/webp) is a modern image file format that provides amazing lossy and lossless compression fidelity. WebP is developed by Google and is freely distributed as open source software.
 
-Google provides prebuilt binaries of WebP for both iOS and macOS on [WebP's download page](https://developers.google.com/speed/webp/download). However, at the time of writing, their build pipeline has not yet been updated to include Apple's other platforms, module support to allow Swift support, or architectural support for Mac Catalyst.
+Google provides precompiled binaries of WebP for both iOS and macOS on [WebP's download page](https://developers.google.com/speed/webp/download). However, at the time of writing, their build pipeline has not yet been updated to include the more modern features of Apple's platforms, such as modules to allow access in Swift, or architectural slices for Mac Catalyst.
 
-Using Google's original build script as a base, this repository both directly builds and serves prebuilt binaries for all of Apple's platforms. In addition to iOS and macOS support, watchOS and tvOS is also supported as well as Mac Catalyst via Apple's new `xcframework` format.
+Using Google's original build script as a base, this repository uses GitHub Actions to automatically build and release precompiled WebP frameworks for all of Apple's current platforms. This includes watchOS and tvOS binaries as well as support for Mac Catalyst via Apple's new `xcframework` format.
 
 There are 4 separate frameworks available for each platform:
 
@@ -15,7 +15,7 @@ There are 4 separate frameworks available for each platform:
 * **WebPMux**: Enables manipulation of WebP container image features like color profile, metadata, animation.
 * **WebPDemux**: Enables extraction of image and extended format data from WebP files.
 
-# Instructions
+# Installation Instructions
 
 1. Download and extract the package for your platform and capabilities of choice.
 2. Drag the `framework` folder into your Xcode project.
@@ -23,8 +23,7 @@ There are 4 separate frameworks available for each platform:
 
 # Download Frameworks
 
-For ultimate convenience, the prebuilt frameworks have been packaged up into multiple combinations of ZIP archives. 
-Simply click one of the links below to begin downloading.
+For fast access, the binaries are bundled up and provided in a variety of different ZIP archive combinations. Simply click any of the links below to begin downloading.
 
 <table>
     <tr>
@@ -239,6 +238,32 @@ Simply click one of the links below to begin downloading.
         </td>
     </tr>
 </table>
+
+# Dependency Managers
+
+If you would prefer to integrate `libwebp` via a dependency manager, the [`libwebp-Xcode`](https://github.com/SDWebImage/libwebp-Xcode) project managed by [SDWebImage](https://github.com/SDWebImage) already provides amazing support for all of the major dependency managers.
+
+For convenience, the configuration settings for using `libwebp-Xcode`'s packages are as follows:
+
+### CocoaPods
+```ruby
+pod 'libwebp'
+```
+
+### Carthage
+```
+github "SDWebImage/libwebp-Xcode"
+```
+
+### Swift Package Manager (SPM)
+```swift
+let package = Package(
+    dependencies: [
+        .package(url: "https://github.com/SDWebImage/libwebp-Xcode", from: "1.1.0")
+    ],
+    // ...
+)
+```
 
 # Credits
 

@@ -33,9 +33,7 @@ lane :package do |options|
   UI.success "...done!"
 
   # Get the list of platform files, and remove the main one
-  platform_files = Dir["../build/*.zip"].sort.map { |path| File.expand_path(path) }
-  platform_files.delete(files)
-  files.append(platform_files)
+  files += Dir["../build/*.zip"].sort.map { |path| File.expand_path(path) }
 
   # Package up all of the separate frameworks
   UI.message "Building all separate packages"
@@ -43,10 +41,11 @@ lane :package do |options|
   UI.success "...done!"
 
   # Get the remaining files and add them to the list
-  separate_files = Dir["../build/*.zip"].sort.map { |path| File.expand_path(path) }
-  separate_files.delete(files)
-  files.append(separate_files)
+  files += Dir["../build/*.zip"].sort.map { |path| File.expand_path(path) }
 
+  # Remove duplicate entries in files list
+  files = files.uniq
+  
   UI.success files
   
   # Update the README with the links to the new version

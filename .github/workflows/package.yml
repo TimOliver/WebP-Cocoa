@@ -20,7 +20,7 @@ jobs:
     steps:
       # Check out the repo with our CI bot's credentials
       - name: Check out WebP-Cococa
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       - uses: fregante/setup-git-token@v1
         with:
           token: ${{ secrets.API_TOKEN }}

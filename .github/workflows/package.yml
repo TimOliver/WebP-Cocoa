@@ -14,7 +14,7 @@ on:
 
 jobs:
   build:
-    # Set the latest version of macOS supported
+    # Run on the latest version of macOS supported
     runs-on: macos-latest
 
     steps:

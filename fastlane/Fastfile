@@ -16,7 +16,7 @@ lane :package do |options|
   
   # Build the binaries
   UI.message "Building binaries..."
-  sh "cd .. && sh build.sh tvos"
+  sh "cd .. && sh build.sh build"
   UI.success "... done!"
 
   # Package up the main bundle
@@ -45,8 +45,6 @@ lane :package do |options|
 
   # Remove duplicate entries in files list
   files = files.uniq
-  
-  UI.success files
   
   # Update the README with the links to the new version
   readme_text = File.read("../templates/README.md")

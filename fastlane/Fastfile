@@ -9,13 +9,13 @@ lane :package do |options|
     UI.user_error!("No tag specified. Please specify a libwebp repo tag to target.")
   end
 
+  # Go up one to the main directory
+  Dir.chdir ".."
+  
   # Verify we haven't shipped this tag before
   if git_tag_exists(tag: tag)
     UI.user_error!("Tag #{tag} already exists! Please use a different one.")
   end
-
-  # Go up one to the main directory
-  Dir.chdir ".."
 
   # Build the binaries
   UI.message "Building binaries..."

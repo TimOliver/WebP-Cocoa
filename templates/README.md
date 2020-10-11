@@ -2,7 +2,7 @@
     <img src="https://github.com/TimOliver/WebP-Cocoa/raw/main/banner.png" width="731" alt="WebP-Cocoa Banner" />
 </p>
 
-[WebP](https://developers.google.com/speed/webp) is a modern image file format that provides amazing lossy and lossless compression fidelity. WebP is developed by Google and its source code is freely distributed as open source under the name [`libwepb`](https://chromium.googlesource.com/webm/libwebp/).
+[WebP](https://developers.google.com/speed/webp) is a modern image file format that provides amazing lossy and lossless compression fidelity. WebP is developed by Google who very kindly publishes the underlying library, [`libwepb` as open source software](https://chromium.googlesource.com/webm/libwebp/).
 
 Google provides precompiled binaries of WebP for both iOS and macOS on [WebP's download page](https://developers.google.com/speed/webp/download). However, at the time of writing, their build pipeline has not yet been updated to support the more modern features of Apple's platforms, such as Swift module support, or architectural slices for Mac Catalyst.
 
@@ -10,8 +10,8 @@ Using Google's original iOS build script as a base, this repository uses GitHub 
 
 There are 4 separate frameworks available for each platform:
 
-* **WebP**: Both encoding and decoding capabilities for the WebP format.
-* **WebPDecoder**: Just the decoding capabilities for the WebP format.
+* **WebP**: Enables both encoding and decoding of WebP image files.
+* **WebPDecoder**: Enables just the decoding of WebP image files.
 * **WebPMux**: Enables manipulation of WebP container image features like color profile, metadata, animation.
 * **WebPDemux**: Enables extraction of image and extended format data from WebP files.
 

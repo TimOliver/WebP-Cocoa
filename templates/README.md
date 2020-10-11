@@ -2,7 +2,7 @@
     <img src="https://github.com/TimOliver/WebP-Cocoa/raw/main/banner.png" width="731" alt="WebP-Cocoa Banner" />
 </p>
 
-[WebP](https://developers.google.com/speed/webp) is a modern image file format that provides amazing lossy and lossless compression fidelity. WebP is developed by Google and is freely distributed as open source software.
+[WebP](https://developers.google.com/speed/webp) is a modern image file format that provides amazing lossy and lossless compression fidelity. WebP is developed by Google and its source code is freely distributed as open source under the name [`libwepb`](https://chromium.googlesource.com/webm/libwebp/).
 
 Google provides precompiled binaries of WebP for both iOS and macOS on [WebP's download page](https://developers.google.com/speed/webp/download). However, at the time of writing, their build pipeline has not yet been updated to support the more modern features of Apple's platforms, such as Swift module support, or architectural slices for Mac Catalyst.
 

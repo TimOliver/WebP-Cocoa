@@ -4,9 +4,9 @@
 
 [WebP](https://developers.google.com/speed/webp) is a modern image file format that provides amazing lossy and lossless compression fidelity. WebP is developed by Google and is freely distributed as open source software.
 
-Google provides precompiled binaries of WebP for both iOS and macOS on [WebP's download page](https://developers.google.com/speed/webp/download). However, at the time of writing, their build pipeline has not yet been updated to adopt the more modern features of Apple's platforms, such as Swift module support, or architectural slices for Mac Catalyst.
+Google provides precompiled binaries of WebP for both iOS and macOS on [WebP's download page](https://developers.google.com/speed/webp/download). However, at the time of writing, their build pipeline has not yet been updated to support the more modern features of Apple's platforms, such as Swift module support, or architectural slices for Mac Catalyst.
 
-Using Google's original build script as a base, this repository uses GitHub Actions to automatically build and release precompiled WebP binaries for all of Apple's platforms. This includes support for watchOS and tvOS as well as support for Mac Catalyst via Apple's new `xcframework` format.
+Using Google's original iOS build script as a base, this repository uses GitHub Actions to automatically build and release precompiled WebP binaries for all of Apple's platforms. This includes support for watchOS and tvOS as well as support for Mac Catalyst via Apple's new `xcframework` format.
 
 There are 4 separate frameworks available for each platform:
 

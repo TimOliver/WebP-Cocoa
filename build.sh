@@ -284,7 +284,7 @@ build_slice() {
 
 make_frameworks() {
 
-  # Make WebP.xcframework
+  # Make WebP.framework
   echo "LIBLIST = ${LIBLIST}"
   TARGETDIR=${TOPDIR}/$1/WebP.framework
   rm -rf ${TARGETDIR}
@@ -301,7 +301,7 @@ framework module WebP [system] {
 EOT
   ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebP
 
-  # Make WebPDecoder.xcframework
+  # Make WebPDecoder.framework
   echo "DECLIBLIST = ${DECLIBLIST}"
   TARGETDIR=${TOPDIR}/$1/WebPDecoder.framework
   rm -rf ${TARGETDIR}
@@ -317,7 +317,7 @@ framework module WebPDecoder [system] {
 EOT
   ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebPDecoder
 
-  # Make WebPMux.xcframework
+  # Make WebPMux.framework
   echo "MUXLIBLIST = ${MUXLIBLIST}"
   TARGETDIR=${TOPDIR}/$1/WebPMux.framework
   mkdir -p ${TARGETDIR}/Headers/
@@ -333,7 +333,7 @@ framework module WebPMux [system] {
 EOT
   ${LIPO} -create ${MUXLIBLIST} -output ${TARGETDIR}/WebPMux
 
-  # Make WebPDemux.xcframework
+  # Make WebPDemux.framework
   echo "DEMUXLIBLIST = ${DEMUXLIBLIST}"
   TARGETDIR=${TOPDIR}/$1/WebPDemux.framework
   mkdir -p ${TARGETDIR}/Headers/
@@ -357,14 +357,18 @@ make_xcframeworks() {
   # Make WebP.xcframework
   echo "LIBLIST = ${LIBLIST}"
   rm -rf ${TARGETDIR}/WebP.xcframework
-  mkdir -p ${TARGETDIR}/Headers/
+  mkdir -p ${TARGETDIR}/Headers
 cat <<EOT >> ${TARGETDIR}/Headers/module.modulemap
 module WebP [system] {
-  header "decode.h"
   header "encode.h"
   header "types.h"
-
   export *
+
+  module Decoder { 
+    header "decode.h"
+    header "types.h"
+    export *
+  }
 }
 EOT
   LIBRARIES=''
@@ -372,7 +376,7 @@ EOT
     LIBRARIES+="-library ${LIBRARY} -headers ${TARGETDIR}/Headers "
   done
   echo ${LIBRARIES}
-  cp -a ${SRCDIR}/src/webp/{decode,encode,types}.h ${TARGETDIR}/Headers/
+  cp -a ${SRCDIR}/src/webp/{decode,encode,types}.h ${TARGETDIR}/Headers
   xcodebuild -create-xcframework ${LIBRARIES} \
               -output ${TARGETDIR}/WebP.xcframework
   rm -rf ${TARGETDIR}/Headers
@@ -380,20 +384,23 @@ EOT
   # Make WebPDecoder.xcframework
   echo "DECLIBLIST = ${DECLIBLIST}"
   rm -rf ${TARGETDIR}/WebPDecoder.xcframework
-  mkdir -p ${TARGETDIR}/Headers/
+  mkdir -p ${TARGETDIR}/Headers
 cat <<EOT >> ${TARGETDIR}/Headers/module.modulemap
-module WebPDecoder [system] {
-  header "decode.h"
-  header "types.h"
-
+module WebP [system] {
   export *
+
+  module Decoder { 
+    header "decode.h"
+    header "types.h"
+    export *
+  }
 }
 EOT
   LIBRARIES=''
   for LIBRARY in ${DECLIBLIST}; do
     LIBRARIES+="-library ${LIBRARY} -headers ${TARGETDIR}/Headers "
   done
-  cp -a ${SRCDIR}/src/webp/{decode,types}.h ${TARGETDIR}/Headers/
+  cp -a ${SRCDIR}/src/webp/{decode,types}.h ${TARGETDIR}/Headers
   xcodebuild -create-xcframework ${LIBRARIES} \
               -output ${TARGETDIR}/WebPDecoder.xcframework
   rm -rf ${TARGETDIR}/Headers
@@ -401,13 +408,12 @@ EOT
   # Make WebPMux.xcframework
   echo "MUXLIBLIST = ${MUXLIBLIST}"
   rm -rf ${TARGETDIR}/WebPMux.xcframework
-  mkdir -p ${TARGETDIR}/Headers/
+  mkdir -p ${TARGETDIR}/Headers
 cat <<EOT >> ${TARGETDIR}/Headers/module.modulemap
 module WebPMux [system] {
   header "mux.h"
   header "mux_types.h"
   header "types.h"
-
   export *
 }
 EOT
@@ -415,7 +421,7 @@ EOT
   for LIBRARY in ${MUXLIBLIST}; do
     LIBRARIES+="-library ${LIBRARY} -headers ${TARGETDIR}/Headers "
   done
-  cp -a ${SRCDIR}/src/webp/{types,mux,mux_types}.h ${TARGETDIR}/Headers/
+  cp -a ${SRCDIR}/src/webp/{types,mux,mux_types}.h ${TARGETDIR}/Headers
   xcodebuild -create-xcframework ${LIBRARIES} \
               -output ${TARGETDIR}/WebPMux.xcframework
   rm -rf ${TARGETDIR}/Headers
@@ -423,14 +429,13 @@ EOT
   # Make WebPDemux.xcframework
   echo "DEMUXLIBLIST = ${DEMUXLIBLIST}"
   rm -rf ${TARGETDIR}/WebPDemux.xcframework
-  mkdir -p ${TARGETDIR}/Headers/
+  mkdir -p ${TARGETDIR}/Headers
 cat <<EOT >> ${TARGETDIR}/Headers/module.modulemap
 module WebPDemux [system] {
   header "decode.h"
   header "mux_types.h"
   header "types.h"
   header "demux.h"
-
   export *
 }
 EOT
@@ -438,7 +443,7 @@ EOT
   for LIBRARY in ${DEMUXLIBLIST}; do
     LIBRARIES+="-library ${LIBRARY} -headers ${TARGETDIR}/Headers "
   done
-  cp -a ${SRCDIR}/src/webp/{decode,types,mux_types,demux}.h ${TARGETDIR}/Headers/
+  cp -a ${SRCDIR}/src/webp/{decode,types,mux_types,demux}.h ${TARGETDIR}/Headers
   xcodebuild -create-xcframework ${LIBRARIES} \
               -output ${TARGETDIR}/WebPDemux.xcframework
   rm -rf ${TARGETDIR}/Headers

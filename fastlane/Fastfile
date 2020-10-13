@@ -24,6 +24,11 @@ lane :package do |options|
   sh "cd .. && sh build.sh package-all"
   UI.success "...done!"
 
+  # Package up a Carthage variant
+  UI.message "Building Carthage package"
+  sh "cd .. && sh build.sh package-carthage"
+  UI.success "...done!"
+
   # Package up all of the platform frameworks
   UI.message "Building platform packages"
   sh "cd .. && sh build.sh package-platform"

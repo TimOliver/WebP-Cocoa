@@ -491,10 +491,19 @@ package_all_frameworks() {
   PLATFORMS="iOS iOS-MacCatalyst tvOS watchOS macOS"
   ZIP_FILENAME="libwebp-${TAG_VERSION}-framework"
 
-  echo ${#PLATFORMS}
+  # Override ZIP name if supplied
+  if [[ ! -z $1 ]]; then
+    ZIP_FILENAME=$1
+  fi
+
+  # If supplied, put the frameworks in this directory
+  ZIP_DIRECTORY=${ZIP_FILENAME}
+  if [[ ! -z $2 ]]; then
+    ZIP_DIRECTORY=$2/
+  fi
 
   # Make a directory to copy all of the frameworks into
-  mkdir -p ${ZIP_FILENAME}
+  mkdir -p ${ZIP_DIRECTORY}
 
   # Copy all framework folders
   for PLATFORM in ${PLATFORMS}; do
@@ -502,14 +511,14 @@ package_all_frameworks() {
       continue
     fi
 
-    rsync -av --exclude=".*" ${PLATFORM} ${ZIP_FILENAME}
+    rsync -av --exclude=".*" ${PLATFORM} ${ZIP_DIRECTORY}
   done
 
   # Generate the ZIP file
   if [[ -d "${ZIP_FILENAME}.zip" ]]; then
     rm -rf "${ZIP_FILENAME}.zip"
   fi
-  zip -r "${ZIP_FILENAME}.zip" ${ZIP_FILENAME}
+  zip -r "${ZIP_FILENAME}.zip" ${ZIP_DIRECTORY}
 
   # Delete the folder copy
   rm -rf ${ZIP_FILENAME}
@@ -588,6 +597,10 @@ case "$COMMAND" in
         build_watchos
         exit 0
         ;;
+
+    "package-carthage")
+      package_all_frameworks "Carthage.framework" "Carthage/Build"
+      exit 0;;
 
     "package-platform")
       package_framework_platform "iOS" "ios"

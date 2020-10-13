@@ -293,10 +293,15 @@ make_frameworks() {
   cp -a ${SRCDIR}/src/webp/{decode,encode,types}.h ${TARGETDIR}/Headers/
 cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
 framework module WebP [system] {
-  header "decode.h"
   header "encode.h"
   header "types.h"
   export *
+
+  module Decoder { 
+    header "decode.h"
+    header "types.h"
+    export *
+  }
 }
 EOT
   ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebP
@@ -309,10 +314,14 @@ EOT
   mkdir -p ${TARGETDIR}/Modules/
   cp -a ${SRCDIR}/src/webp/{decode,types}.h ${TARGETDIR}/Headers/
 cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
-framework module WebPDecoder [system] {
-  header "decode.h"
-  header "types.h"
+framework module WebP [system] {
   export *
+
+  module Decoder { 
+    header "decode.h"
+    header "types.h"
+    export *
+  }
 }
 EOT
   ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebPDecoder

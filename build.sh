@@ -314,14 +314,10 @@ EOT
   mkdir -p ${TARGETDIR}/Modules/
   cp -a ${SRCDIR}/src/webp/{decode,types}.h ${TARGETDIR}/Headers/
 cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
-framework module WebP [system] {
+framework module WebPDecoder [system] {
+  header "decode.h"
+  header "types.h"
   export *
-
-  module Decoder { 
-    header "decode.h"
-    header "types.h"
-    export *
-  }
 }
 EOT
   ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebPDecoder
@@ -395,14 +391,10 @@ EOT
   rm -rf ${TARGETDIR}/WebPDecoder.xcframework
   mkdir -p ${TARGETDIR}/Headers
 cat <<EOT >> ${TARGETDIR}/Headers/module.modulemap
-module WebP [system] {
+module WebPDecoder [system] {
+  header "decode.h"
+  header "types.h"
   export *
-
-  module Decoder { 
-    header "decode.h"
-    header "types.h"
-    export *
-  }
 }
 EOT
   LIBRARIES=''

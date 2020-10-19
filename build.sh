@@ -182,7 +182,7 @@ build_macos() {
   BUILDDIR="$(pwd)/macosbuild"
 
   build_common
-  # build_slice "arm64" "arm64-apple-macos11" "arm-apple-darwin" "MacOSX" ""
+  build_slice "arm64" "arm64-apple-macos11" "arm-apple-darwin" "macosx" ""
   build_slice "x86_64" "x86_64-apple-macos10.12" "x86_64-apple-darwin" "macosx" "-mmacosx-version-min=10.12"
   make_frameworks "macOS"
 }

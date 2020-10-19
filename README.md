@@ -125,6 +125,7 @@ For fast access, the binaries are bundled up and provided in a variety of differ
         <td>
             <ul>
                 <li><code>x86_64</code></li>
+                <li><code>arm64</code></li>
             </ul>
         </td>
         <td>

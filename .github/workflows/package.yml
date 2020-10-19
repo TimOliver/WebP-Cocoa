@@ -15,7 +15,7 @@ on:
 jobs:
   build:
     # Run on the latest version of macOS supported
-    runs-on: macos-latest
+    runs-on: macos-11.0
 
     steps:
       # Check out the repo with our CI bot's credentials

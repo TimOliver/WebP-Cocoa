@@ -94,6 +94,8 @@ clone_repo() {
 }
 
 build_ios() {
+      cd ${WEBP_SRC_DIR}
+
   # Query for the SDK version installed
   SDK=$(xcodebuild -showsdks \
     | grep iphoneos | sort | tail -n 1 | awk '{print substr($NF, 9)}'
@@ -111,12 +113,22 @@ build_ios() {
 
   # Build all of the iOS native device slices
   build_common
-  build_slice "armv7" "armv7-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
-  build_slice "armv7s" "armv7s-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
-  build_slice "arm64" "aarch64-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
-  build_slice "x86_64" "x86_64-apple-ios" "x86_64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
-  build_slice "i386" "i386-apple-ios" "i386-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
-  make_frameworks "iOS"
+
+  # iOS Native
+  #build_slice "armv7" "armv7-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+  #build_slice "armv7s" "armv7s-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+  #build_slice "arm64" "aarch64-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+
+  # iOS Simulator
+  #build_slice "x86_64" "x86_64-apple-ios9.0-simulator" "x86_64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+  # build_slice "i386" "i386-apple-ios9.0-simulator" "i386-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+  # build_slice "arm64" "arm64-apple-ios9.0-simulator" "aarch64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+
+  # Mac Catalyst
+  build_slice "x86_64" "x86_64-apple-ios13.0-macabi" "x86_64-apple-darwin" "macosx" ""
+  build_slice "arm64" "aarch64-apple-ios-macabi" "arm-apple-darwin" "macosx" ""
+
+  make_xcframeworks "iOS"
 }
 
 build_ios_catalyst() {
@@ -160,8 +172,13 @@ build_tvos() {
   BUILDDIR="$(pwd)/tvosbuild"
 
   build_common
+
+  # tvOS Simulator
+  build_slice "arm64" "arm64-apple-tvos9.0-simulator" "aarch64-apple-darwin" "appletvsimulator" "-mtvos-version-min=9.0"
+  build_slice "x86_64" "x86_64-apple-tvos9.0-simulator" "x86_64-apple-darwin" "appletvsimulator" "-mtvos-version-min=9.0"
+
+  # tvOS Native Devices
   build_slice "arm64" "aarch64-apple-tvos" "arm-apple-darwin" "appletvos" "-mtvos-version-min=9.0"
-  build_slice "x86_64" "x86_64-apple-tvos" "x86_64-apple-darwin" "appletvsimulator" "-mtvos-version-min=9.0"
   make_frameworks "tvOS"
 }
 
@@ -204,10 +221,16 @@ build_watchos() {
   BUILDDIR="$(pwd)/watchosbuild"
 
   build_common
+
+  # watchOS Simulator
+  build_slice "arm64" "arm64-apple-watchos2.0-simulator" "aarch64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+  build_slice "x86_64" "x86_64-apple-watchos2.0-simulator" "x86_64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+  build_slice "i386" "i386-apple-watchos2.0-simulator" "i386-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+
+  # watchOS Native Devices
   build_slice "arm64_32" "arm64_32-apple-watchos" "arm-apple-darwin" "watchos" "-mwatchos-version-min=2.0"
   build_slice "armv7k" "armv7k-apple-watchos" "arm-apple-darwin" "watchos" "-mwatchos-version-min=2.0"
-  build_slice "x86_64" "x86_64-apple-watchos" "x86_64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
-  build_slice "i386" "i386-apple-watchos" "i386-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+
   make_frameworks "watchOS"
 }
 
@@ -245,8 +268,8 @@ build_slice() {
   HOST=$3
   PLATFORM=$4
   VERSION=$5
-  
-  ROOTDIR="${BUILDDIR}/${PLATFORM}-${ARCH}"
+
+  ROOTDIR="${BUILDDIR}/${TARGET}"
   mkdir -p "${ROOTDIR}"
   
   DEVROOT="${DEVELOPER}/Toolchains/XcodeDefault.xctoolchain"
@@ -561,7 +584,7 @@ case "$COMMAND" in
         ;;
 
     "ios")
-        clone_repo
+        # clone_repo
         build_ios
         exit 0
         ;;

@@ -38,7 +38,7 @@ jobs:
 
       # Install the GNU tools to build from the command line
       - name: Install CL Tools
-        run: brew install autoconf automake libtools
+        run: brew install autoconf automake libtool
 
       # Execute fastlane
       - name: Run Fastlane

@@ -15,7 +15,7 @@ on:
 jobs:
   build:
     # Run on the latest version of macOS supported
-    runs-on: macos-11
+    runs-on: macos-latest
 
     steps:
       # Set the version of Xcode to 12.0

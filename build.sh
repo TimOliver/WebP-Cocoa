@@ -68,7 +68,6 @@ Usage: sh $0 command [argument]
 command:
   all:            builds all frameworks
   ios:              builds iOS framework
-  ios-catalyst:     builds iOS xcframework (With Mac Catalyst)
   tvos:             builds tvOS framework
   macos:            builds macOS framework
   watchos:          builds watchOS framework
@@ -452,7 +451,7 @@ package_framework_platform() {
 }
 
 package_all_frameworks() {
-  PLATFORMS="iOS iOS-MacCatalyst tvOS watchOS macOS"
+  PLATFORMS="iOS tvOS watchOS macOS"
   ZIP_FILENAME="libwebp-${TAG_VERSION}-framework"
 
   # Override ZIP name if supplied
@@ -486,6 +485,35 @@ package_all_frameworks() {
 
   # Delete the folder copy
   rm -rf ${ZIP_FILENAME}
+}
+
+package_carthage() {
+  PLATFORMS="iOS tvOS watchOS macOS"
+  FRAMEWORKS="WebP WebPDecoder WebPDemux WebPMux"
+
+  # Make a new folder for Carthage
+  rm -rf Carthage
+  mkdir -p Carthage
+
+  # Loop through each framework name to collect all of the libraries
+  for FRAMEWORK in ${FRAMEWORKS}; do
+    PATHS=''
+    # Loop through each platform and aggregate the libraries
+    for PLATFORM in ${PLATFORMS}; do
+      if [[ ! -d ${PLATFORM} ]]; then
+        continue
+      fi
+
+      for BINARY in ${PLATFORM}/${FRAMEWORK}.xcframework/**/*.a; do
+        PATHS+="-library ${BINARY} "
+      done
+    done
+
+    xcodebuild -create-xcframework ${PATHS} -output Carthage/${FRAMEWORK}.xcframework
+  done
+
+  # Zip up the Carthage folder
+  zip -r "Carthage.zip" Carthage
 }
 
 package_each_framework() {
@@ -556,7 +584,7 @@ case "$COMMAND" in
         ;;
 
     "package-carthage")
-      package_all_frameworks "Carthage.xcframework" "Carthage/Build"
+      package_carthage
       exit 0;;
 
     "package-platform")

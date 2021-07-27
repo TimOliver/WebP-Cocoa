@@ -66,7 +66,7 @@ cat <<EOF
 Usage: sh $0 command [argument]
 
 command:
-  build:            builds all frameworks
+  all:            builds all frameworks
   ios:              builds iOS framework
   ios-catalyst:     builds iOS xcframework (With Mac Catalyst)
   tvos:             builds tvOS framework
@@ -93,8 +93,43 @@ clone_repo() {
   cd ${WEBP_SRC_DIR}
 }
 
+# Perform common set-up/reset between builds
+build_common() {
+  SRCDIR=$(dirname $0)
+
+  # Remove previous build folders
+  rm -rf ${BUILDDIR}
+  mkdir -p ${BUILDDIR}
+
+  # Set up/reset values for storing paths to
+  # all of the universal binary files
+  LIBLIST=''
+  DECLIBLIST=''
+  MUXLIBLIST=''
+  DEMUXLIBLIST=''
+
+  # Set up a temporary list of binaries for the
+  # same platform so they can be combined into a fat binary
+  ARCH_LIBLIST=''
+  ARCH_DECLIBLIST=''
+  ARCH_MUXLIBLIST=''
+  ARCH_DEMUXLIBLIST=''
+
+  # Configure build settings
+    if [[ ! -e ${SRCDIR}/configure ]]; then
+      if ! (cd ${SRCDIR} && sh autogen.sh); then
+        cat <<EOT
+Error creating configure script!
+This script requires the autoconf/automake and libtool to build. MacPorts can
+be used to obtain these:
+http://www.macports.org/install.php
+EOT
+        exit 1
+      fi
+    fi
+}
+
 build_ios() {
-      cd ${WEBP_SRC_DIR}
 
   # Query for the SDK version installed
   SDK=$(xcodebuild -showsdks \
@@ -115,44 +150,23 @@ build_ios() {
   build_common
 
   # iOS Native
-  #build_slice "armv7" "armv7-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
-  #build_slice "armv7s" "armv7s-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
-  #build_slice "arm64" "aarch64-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+  build_slice "armv7" "armv7-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+  build_slice "armv7s" "armv7s-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+  build_slice "arm64" "aarch64-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=9.0"
+  make_fat_binary "iphoneos-universal"
 
   # iOS Simulator
-  #build_slice "x86_64" "x86_64-apple-ios9.0-simulator" "x86_64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
-  # build_slice "i386" "i386-apple-ios9.0-simulator" "i386-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
-  # build_slice "arm64" "arm64-apple-ios9.0-simulator" "aarch64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+  build_slice "x86_64" "x86_64-apple-ios9.0-simulator" "x86_64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+  build_slice "i386" "i386-apple-ios9.0-simulator" "i386-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+  build_slice "arm64" "arm64-apple-ios9.0-simulator" "aarch64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=9.0"
+  make_fat_binary "iphone-simulator-universal"
 
   # Mac Catalyst
   build_slice "x86_64" "x86_64-apple-ios13.0-macabi" "x86_64-apple-darwin" "macosx" ""
   build_slice "arm64" "aarch64-apple-ios-macabi" "arm-apple-darwin" "macosx" ""
+  make_fat_binary "mac-catalyst-universal"
 
   make_xcframeworks "iOS"
-}
-
-build_ios_catalyst() {
-  # Query for the SDK version installed
-  SDK=$(xcodebuild -showsdks \
-    | grep iphoneos | sort | tail -n 1 | awk '{print substr($NF, 9)}'
-  )
-
-  # Check to make sure we found the SDK version
-  if [[ -z "${SDK}" ]]; then
-    echo "iOS SDK not available"
-    exit 1
-  else 
-    echo "iOS SDK Version ${SDK}"
-  fi
-
-  BUILDDIR="$(pwd)/iosbuild-catalyst"
-
-  # Build all of the iOS native device slices
-  build_common
-  build_slice "x86_64" "x86_64-apple-ios13.0-macabi" "x86_64-apple-darwin" "macosx" "-miphoneos-version-min=11.0" 
-  build_slice "arm64" "aarch64-apple-ios" "arm-apple-darwin" "iphoneos" "-miphoneos-version-min=11.0"
-  build_slice "x86_64" "x86_64-apple-ios" "x86_64-apple-darwin" "iphonesimulator" "-miphoneos-version-min=11.0"
-  make_xcframeworks "iOS-MacCatalyst"
 }
 
 build_tvos() {
@@ -176,10 +190,13 @@ build_tvos() {
   # tvOS Simulator
   build_slice "arm64" "arm64-apple-tvos9.0-simulator" "aarch64-apple-darwin" "appletvsimulator" "-mtvos-version-min=9.0"
   build_slice "x86_64" "x86_64-apple-tvos9.0-simulator" "x86_64-apple-darwin" "appletvsimulator" "-mtvos-version-min=9.0"
+  make_fat_binary "tvos-simulator-universal"
 
   # tvOS Native Devices
   build_slice "arm64" "aarch64-apple-tvos" "arm-apple-darwin" "appletvos" "-mtvos-version-min=9.0"
-  make_frameworks "tvOS"
+  make_fat_binary "tvos-universal"
+
+  make_xcframeworks "tvOS"
 }
 
 build_macos() {
@@ -201,7 +218,9 @@ build_macos() {
   build_common
   build_slice "arm64" "arm64-apple-macos11" "arm-apple-darwin" "macosx" ""
   build_slice "x86_64" "x86_64-apple-macos10.12" "x86_64-apple-darwin" "macosx" "-mmacosx-version-min=10.12"
-  make_frameworks "macOS"
+  make_fat_binary "macos-universal"
+
+  make_xcframeworks "macOS"
 }
 
 build_watchos() {
@@ -226,40 +245,14 @@ build_watchos() {
   build_slice "arm64" "arm64-apple-watchos2.0-simulator" "aarch64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
   build_slice "x86_64" "x86_64-apple-watchos2.0-simulator" "x86_64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
   build_slice "i386" "i386-apple-watchos2.0-simulator" "i386-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+  make_fat_binary "watchos-simulator-universal"
 
   # watchOS Native Devices
   build_slice "arm64_32" "arm64_32-apple-watchos" "arm-apple-darwin" "watchos" "-mwatchos-version-min=2.0"
   build_slice "armv7k" "armv7k-apple-watchos" "arm-apple-darwin" "watchos" "-mwatchos-version-min=2.0"
+  make_fat_binary "watchos-universal"
 
-  make_frameworks "watchOS"
-}
-
-# Perform common set-up/reset between builds
-build_common() {
-  SRCDIR=$(dirname $0)
-
-  # Remove previous build folders
-  rm -rf ${BUILDDIR}
-  mkdir -p ${BUILDDIR}
-
-  # Reset the lists of built binaries
-  LIBLIST=''
-  DECLIBLIST=''
-  MUXLIBLIST=''
-  DEMUXLIBLIST=''
-
-  # Configure build settings
-    if [[ ! -e ${SRCDIR}/configure ]]; then
-      if ! (cd ${SRCDIR} && sh autogen.sh); then
-        cat <<EOT
-Error creating configure script!
-This script requires the autoconf/automake and libtool to build. MacPorts can
-be used to obtain these:
-http://www.macports.org/install.php
-EOT
-        exit 1
-      fi
-    fi
+  make_xcframeworks "watchOS"
 }
 
 build_slice() {
@@ -293,11 +286,11 @@ build_slice() {
   make V=0
   make install
 
-  # Capture the locations of all of the built binaries
-  LIBLIST+=" ${ROOTDIR}/lib/libwebp.a"
-  DECLIBLIST+=" ${ROOTDIR}/lib/libwebpdecoder.a"
-  MUXLIBLIST+=" ${ROOTDIR}/lib/libwebpmux.a"
-  DEMUXLIBLIST+=" ${ROOTDIR}/lib/libwebpdemux.a"
+  # Add this slice to the list of architectures
+  ARCH_LIBLIST+=" ${ROOTDIR}/lib/libwebp.a"
+  ARCH_DECLIBLIST+=" ${ROOTDIR}/lib/libwebpdecoder.a"
+  ARCH_MUXLIBLIST+=" ${ROOTDIR}/lib/libwebpmux.a"
+  ARCH_DEMUXLIBLIST+=" ${ROOTDIR}/lib/libwebpdemux.a"
 
   make clean
   cd ..
@@ -305,78 +298,34 @@ build_slice() {
   export PATH=${OLDPATH}
 }
 
-make_frameworks() {
+make_fat_binary() {
+  NAME=$1
 
-  # Make WebP.framework
-  echo "LIBLIST = ${LIBLIST}"
-  TARGETDIR=${TOPDIR}/$1/WebP.framework
-  rm -rf ${TARGETDIR}
-  mkdir -p ${TARGETDIR}/Headers/
-  mkdir -p ${TARGETDIR}/Modules/
-  cp -a ${SRCDIR}/src/webp/{decode,encode,types}.h ${TARGETDIR}/Headers/
-cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
-framework module WebP [system] {
-  header "encode.h"
-  header "types.h"
-  export *
+  # Make a directory to hold the final binary
+  cd ${BUILDDIR}
+  mkdir ${NAME}
+  cd ${NAME}
 
-  module Decoder { 
-    header "decode.h"
-    header "types.h"
-    export *
-  }
-}
-EOT
-  ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebP
+  # Create the universal binary
+  ${LIPO} -create ${ARCH_LIBLIST} -output libwebp.a
+  ${LIPO} -create ${ARCH_DECLIBLIST} -output libwebpdecoder.a
+  ${LIPO} -create ${ARCH_MUXLIBLIST} -output libwebpmux.a
+  ${LIPO} -create ${ARCH_DEMUXLIBLIST} -output libwebpdemux.a
 
-  # Make WebPDecoder.framework
-  echo "DECLIBLIST = ${DECLIBLIST}"
-  TARGETDIR=${TOPDIR}/$1/WebPDecoder.framework
-  rm -rf ${TARGETDIR}
-  mkdir -p ${TARGETDIR}/Headers/
-  mkdir -p ${TARGETDIR}/Modules/
-  cp -a ${SRCDIR}/src/webp/{decode,types}.h ${TARGETDIR}/Headers/
-cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
-framework module WebPDecoder [system] {
-  header "decode.h"
-  header "types.h"
-  export *
-}
-EOT
-  ${LIPO} -create ${LIBLIST} -output ${TARGETDIR}/WebPDecoder
+  # Capture the final framework file paths for the xcframework
+  LIBLIST+=" $(pwd)/libwebp.a"
+  DECLIBLIST+=" $(pwd)/libwebpdecoder.a"
+  MUXLIBLIST+=" $(pwd)/libwebpmux.a"
+  DEMUXLIBLIST+=" $(pwd)/libwebpdemux.a"
 
-  # Make WebPMux.framework
-  echo "MUXLIBLIST = ${MUXLIBLIST}"
-  TARGETDIR=${TOPDIR}/$1/WebPMux.framework
-  mkdir -p ${TARGETDIR}/Headers/
-  mkdir -p ${TARGETDIR}/Modules/
-  cp -a ${SRCDIR}/src/webp/{types,mux,mux_types}.h ${TARGETDIR}/Headers/
-cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
-framework module WebPMux [system] {
-  header "mux.h"
-  header "mux_types.h"
-  header "types.h"
-  export *
-}
-EOT
-  ${LIPO} -create ${MUXLIBLIST} -output ${TARGETDIR}/WebPMux
+  # Reset the list of architecture slices
+  ARCH_LIBLIST=''
+  ARCH_DECLIBLIST=''
+  ARCH_MUXLIBLIST=''
+  ARCH_DEMUXLIBLIST=''
 
-  # Make WebPDemux.framework
-  echo "DEMUXLIBLIST = ${DEMUXLIBLIST}"
-  TARGETDIR=${TOPDIR}/$1/WebPDemux.framework
-  mkdir -p ${TARGETDIR}/Headers/
-  mkdir -p ${TARGETDIR}/Modules/
-  cp -a ${SRCDIR}/src/webp/{decode,types,mux_types,demux}.h ${TARGETDIR}/Headers/
-cat <<EOT >> ${TARGETDIR}/Modules/module.modulemap
-framework module WebPDemux [system] {
-  header "decode.h"
-  header "mux_types.h"
-  header "types.h"
-  header "demux.h"
-  export *
-}
-EOT
-  ${LIPO} -create ${DEMUXLIBLIST} -output ${TARGETDIR}/WebPDemux
+  # Go back up to the source folder
+  cd ../../
 }
 
 make_xcframeworks() {
@@ -573,10 +522,9 @@ package_each_framework() {
 COMMAND="$1"
 case "$COMMAND" in
 
-      "build")
+      "all")
         clone_repo
         build_ios
-        build_ios_catalyst
         build_tvos
         build_macos
         build_watchos
@@ -584,14 +532,8 @@ case "$COMMAND" in
         ;;
 
     "ios")
-        # clone_repo
-        build_ios
-        exit 0
-        ;;
-
-    "ios-catalyst")
         clone_repo
-        build_ios_catalyst
+        build_ios
         exit 0
         ;;
     
@@ -614,7 +556,7 @@ case "$COMMAND" in
         ;;
 
     "package-carthage")
-      package_all_frameworks "Carthage.framework" "Carthage/Build"
+      package_all_frameworks "Carthage.xcframework" "Carthage/Build"
       exit 0;;
 
     "package-platform")
@@ -622,30 +564,25 @@ case "$COMMAND" in
       package_framework_platform "tvOS" "tvos"
       package_framework_platform "watchOS" "watchos"
       package_framework_platform "macOS" "macos"
-      package_framework_platform "iOS-MacCatalyst" "ios-catalyst"
       exit 0;;
 
     "package-each")
-      package_each_framework "iOS" "ios" "WebP.framework" "webp"
-      package_each_framework "iOS" "ios" "WebPDecoder.framework" "webpdecoder"
-      package_each_framework "iOS" "ios" "WebPDemux.framework" "webpdemux"
-      package_each_framework "iOS" "ios" "WebPMux.framework" "webpmux"
-      package_each_framework "iOS-MacCatalyst" "ios-catalyst" "WebP.xcframework" "webp"
-      package_each_framework "iOS-MacCatalyst" "ios-catalyst" "WebPDecoder.xcframework" "webpdecoder"
-      package_each_framework "iOS-MacCatalyst" "ios-catalyst" "WebPDemux.xcframework" "webpdemux"
-      package_each_framework "iOS-MacCatalyst" "ios-catalyst" "WebPMux.xcframework" "webpmux"
-      package_each_framework "tvOS" "tvos" "WebP.framework" "webp"
-      package_each_framework "tvOS" "tvos" "WebPDecoder.framework" "webpdecoder"
-      package_each_framework "tvOS" "tvos" "WebPDemux.framework" "webpdemux"
-      package_each_framework "tvOS" "tvos" "WebPMux.framework" "webpmux"
-      package_each_framework "macOS" "macos" "WebP.framework" "webp"
-      package_each_framework "macOS" "macos" "WebPDecoder.framework" "webpdecoder"
-      package_each_framework "macOS" "macos" "WebPDemux.framework" "webpdemux"
-      package_each_framework "macOS" "macos" "WebPMux.framework" "webpmux"
-      package_each_framework "watchOS" "watchos" "WebP.framework" "webp"
-      package_each_framework "watchOS" "watchos" "WebPDecoder.framework" "webpdecoder"
-      package_each_framework "watchOS" "watchos" "WebPDemux.framework" "webpdemux"
-      package_each_framework "watchOS" "watchos" "WebPMux.framework" "webpmux"
+      package_each_framework "iOS" "ios" "WebP.xcframework" "webp"
+      package_each_framework "iOS" "ios" "WebPDecoder.xcframework" "webpdecoder"
+      package_each_framework "iOS" "ios" "WebPDemux.xcframework" "webpdemux"
+      package_each_framework "iOS" "ios" "WebPMux.xcframework" "webpmux"
+      package_each_framework "tvOS" "tvos" "WebP.xcframework" "webp"
+      package_each_framework "tvOS" "tvos" "WebPDecoder.xcframework" "webpdecoder"
+      package_each_framework "tvOS" "tvos" "WebPDemux.xcframework" "webpdemux"
+      package_each_framework "tvOS" "tvos" "WebPMux.xcframework" "webpmux"
+      package_each_framework "macOS" "macos" "WebP.xcframework" "webp"
+      package_each_framework "macOS" "macos" "WebPDecoder.xcframework" "webpdecoder"
+      package_each_framework "macOS" "macos" "WebPDemux.xcframework" "webpdemux"
+      package_each_framework "macOS" "macos" "WebPMux.xcframework" "webpmux"
+      package_each_framework "watchOS" "watchos" "WebP.xcframework" "webp"
+      package_each_framework "watchOS" "watchos" "WebPDecoder.xcframework" "webpdecoder"
+      package_each_framework "watchOS" "watchos" "WebPDemux.xcframework" "webpdemux"
+      package_each_framework "watchOS" "watchos" "WebPMux.xcframework" "webpmux"
       exit 0;;
 
     "package-all")

@@ -61,7 +61,7 @@ lane :package do |options|
   UI.message "Uploading to GitHub Releases"
   set_github_release(
     repository_name: "TimOliver/WebP-Cocoa",
-    api_token: ENV["API_TOKEN"],
+    api_token: ENV["GITHUB_TOKEN"],
     name: tag,
     tag_name: tag,
     description: "",

@@ -28,7 +28,7 @@ For fast access, the binaries are bundled up and provided in a variety of differ
 <table>
     <tr>
         <td colspan="4" align="center">
-            <strong><a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework.zip">Download All Frameworks for All Platforms (ZIP)</a></strong>
+            <strong><a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework.zip">Download All Frameworks for All Platforms (ZIP)</a></strong>
         </td>
     </tr>
     <tr>
@@ -38,48 +38,12 @@ For fast access, the binaries are bundled up and provided in a variety of differ
         <th>Download Packages</th>
     </tr>
     <tr>
-        <td><b>iOS</b><br />(Mac Catalyst)</td>
-        <td>iOS 11.0 and up.<br/>macOS 10.15 and up.</td>
+        <td><strong>iOS<br/>iPadOS</strong></td>
         <td>
-            <ul>
-                <li><code>arm64</code></li>
-                <li><code>x86_64</code> (Mac Catalyst)</li>
-                <li><code>x86_64</code> (Simulator)</li>
-            </ul>
+	        iOS 9.0 and up.<br/>
+	        iPadOS 13.0 and up.<br/>
+	        Mac Catalyst 13.0 and up.
         </td>
-        <td>
-            <ul>
-                <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst.zip">
-                        <strong>Download All (ZIP)</strong>
-                    </a>
-                </li>
-                <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webp.zip">
-                        <code>WebP.xcframework</code>
-                    </a>
-                </li>
-                <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webpdecoder.zip">
-                        <code>WebPDecoder.xcframework</code>
-                    </a>
-                </li>
-                <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webpdemux.zip">
-                        <code>WebPDemux.xcframework</code>
-                    </a>
-                </li>
-                <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-catalyst-webpmux.zip">
-                        <code>WebPMux.xcframework</code>
-                    </a>
-                </li>
-            </ul>
-        </td>
-    </tr>
-    <tr>
-        <td><strong>iOS</strong></td>
-        <td>iOS 9.0 and up.</td>
         <td>
             <ul>
                 <li><code>arm64</code></li>
@@ -92,28 +56,28 @@ For fast access, the binaries are bundled up and provided in a variety of differ
         <td>
             <ul>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios.zip">
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-ios.zip">
                         <strong>Download All (ZIP)</strong>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webp.zip">
-                        <code>WebP.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-ios-webp.zip">
+                        <code>WebP.xcframework</code>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webpdecoder.zip">
-                        <code>WebPDecoder.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-ios-webpdecoder.zip">
+                        <code>WebPDecoder.xcframework</code>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webpdemux.zip">
-                        <code>WebPDemux.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-ios-webpdemux.zip">
+                        <code>WebPDemux.xcframework</code>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-ios-webpmux.zip">
-                        <code>WebPMux.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-ios-webpmux.zip">
+                        <code>WebPMux.xcframework</code>
                     </a>
                 </li>
             </ul>
@@ -131,28 +95,28 @@ For fast access, the binaries are bundled up and provided in a variety of differ
         <td>
             <ul>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-macos.zip">
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-macos.zip">
                     <strong>Download All (ZIP)</strong>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-macos-webp.zip">
-                    <code>WebP.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-macos-webp.zip">
+                    <code>WebP.xcframework</code>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-macos-webpdecoder.zip">
-                    <code>WebPDecoder.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-macos-webpdecoder.zip">
+                    <code>WebPDecoder.xcframework</code>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-macos-webpdemux.zip">
-                    <code>WebPDemux.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-macos-webpdemux.zip">
+                    <code>WebPDemux.xcframework</code>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-macos-webpmux.zip">
-                    <code>WebPMux.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-macos-webpmux.zip">
+                    <code>WebPMux.xcframework</code>
                 </a>
             </li>
             </ul>
@@ -170,28 +134,28 @@ For fast access, the binaries are bundled up and provided in a variety of differ
         <td>
             <ul>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos.zip">
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-tvos.zip">
                     <strong>Download All (ZIP)</strong>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webp.zip">
-                    <code>WebP.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-tvos-webp.zip">
+                    <code>WebP.xcframework</code>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webpdecoder.zip">
-                    <code>WebPDecoder.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-tvos-webpdecoder.zip">
+                    <code>WebPDecoder.xcframework</code>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webpdemux.zip">
-                    <code>WebPDemux.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-tvos-webpdemux.zip">
+                    <code>WebPDemux.xcframework</code>
                 </a>
             </li>
             <li>
-                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-tvos-webpmux.zip">
-                    <code>WebPMux.framework</code>
+                <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-tvos-webpmux.zip">
+                    <code>WebPMux.xcframework</code>
                 </a>
             </li>
             </ul>
@@ -211,28 +175,28 @@ For fast access, the binaries are bundled up and provided in a variety of differ
         <td>
             <ul>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos.zip">
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-watchos.zip">
                         <strong>Download All (ZIP)</strong>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webp.zip">
-                        <code>WebP.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-watchos-webp.zip">
+                        <code>WebP.xcframework</code>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webpdecoder.zip">
-                        <code>WebPDecoder.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-watchos-webpdecoder.zip">
+                        <code>WebPDecoder.xcframework</code>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webpdemux.zip">
-                        <code>WebPDemux.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-watchos-webpdemux.zip">
+                        <code>WebPDemux.xcframework</code>
                     </a>
                 </li>
                 <li>
-                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.1.0/libwebp-v1.1.0-framework-watchos-webpmux.zip">
-                        <code>WebPMux.framework</code>
+                    <a href="https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.2.1/libwebp-v1.2.1-framework-watchos-webpmux.zip">
+                        <code>WebPMux.xcframework</code>
                     </a>
                 </li>
             </ul>

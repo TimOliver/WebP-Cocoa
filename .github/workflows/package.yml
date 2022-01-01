@@ -17,13 +17,7 @@ jobs:
     # Run on the latest version of macOS supported
     runs-on: macos-latest
 
-    steps:
-      # Set the version of Xcode to 12.0
-      - name: Set Xcode version
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '12.0'
-      
+    steps:      
       # Check out the repo with our CI bot's credentials
       - name: Check out WebP-Cococa
         uses: actions/checkout@v2

@@ -42,7 +42,7 @@ readonly WEBP_SRC_DIR="libwebp"
 readonly TOPDIR=$(pwd)
 
 # Read the tag from ENV, or default to a manually specified one
-TAG_VERSION="v1.1.0"
+TAG_VERSION="v1.2.2"
 if [[ ! -z ${WEBP_TAG_VERSION} ]]; then
   TAG_VERSION=${WEBP_TAG_VERSION}
 fi
@@ -241,9 +241,9 @@ build_watchos() {
   build_common
 
   # watchOS Simulator
-  build_slice "arm64" "arm64-apple-watchos2.0-simulator" "aarch64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
-  build_slice "x86_64" "x86_64-apple-watchos2.0-simulator" "x86_64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
-  build_slice "i386" "i386-apple-watchos2.0-simulator" "i386-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+  build_slice "arm64" "arm64-apple-watchos-simulator" "aarch64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+  build_slice "x86_64" "x86_64-apple-watchos-simulator" "x86_64-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
+  build_slice "i386" "i386-apple-watchos-simulator" "i386-apple-darwin" "watchsimulator" "-mwatchos-version-min=2.0"
   make_fat_binary "watchos-simulator-universal"
 
   # watchOS Native Devices

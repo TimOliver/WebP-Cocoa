@@ -1,0 +1,17 @@
+{
+  "libwebp": {
+    "version": "1.6.0",
+    "url": "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz",
+    "sha256": "e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564"
+  },
+  "tools": {
+    "xcode": "26.3",
+    "xcode_build": "17C529",
+    "sdk": "26.2",
+    "cmake": "4.1.1",
+    "ninja": "1.13.2",
+    "python": "3.13.7"
+  },
+  "deployment": {"macos": "11.0", "ios": "15.0", "tvos": "15.0", "watchos": "8.0", "visionos": "1.0", "catalyst": "15.0"},
+  "architecture_deployment": {"watchos": {"arm64": "26.0"}}
+}

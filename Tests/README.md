@@ -18,7 +18,7 @@ lossy pixels, buffer decoding, incremental decoding, malformed/truncated input,
 animated frame iteration, animation timestamps/pixels/reset and EXIF extraction.
 The full library additionally runs a lossless encode/decode round trip, XMP
 mux/demux and lossy encoding with `use_sharp_yuv=1`. Four actual SwiftPM executable
-consumers build and run against `WebPImageIO`, `WebPFull`, `WebPDecoder` and `WebP`
+consumers build and run against `WebPDecoding`, `WebPFull`, `WebPDecoder` and `WebP`
 products.
 
 Mobile, simulator and Catalyst binaries are cross-linked, not executed by this

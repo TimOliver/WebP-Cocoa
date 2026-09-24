@@ -14,7 +14,7 @@ let package = Package(
         .library(name: "WebPDecoder", targets: ["WebPDecoder"]),
         .library(name: "WebPDemux", targets: ["WebPDemux"]),
         .library(name: "WebPMux", targets: ["WebPMux"]),
-        .library(name: "WebPImageIO", targets: ["WebPDecoder", "WebPDemux"]),
+        .library(name: "WebPDecoding", targets: ["WebPDecoder", "WebPDemux"]),
         .library(name: "WebPFull", targets: ["WebP", "WebPDemux", "WebPMux"]),
     ],
     targets: [

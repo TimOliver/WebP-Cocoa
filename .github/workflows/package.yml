@@ -133,7 +133,7 @@ jobs:
           cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
           Static libwebp XCFrameworks for macOS, iOS, Mac Catalyst, tvOS, watchOS and visionOS.
 
-          Use the WebPImageIO SwiftPM product for decoder + demux, or WebPFull for encoding, decoding and mux/demux. The four individual products remain available. WebP and WebPDecoder contain overlapping decoder symbols and must not be linked together.
+          Use the WebPDecoding SwiftPM product for decoder + demux, or WebPFull for encoding, decoding and mux/demux. The four individual products remain available. WebP and WebPDecoder contain overlapping decoder symbols and must not be linked together.
 
           Each XCFramework includes upstream licenses. SHA256SUMS covers the binary archives, generated SwiftPM manifest and build provenance. See the README at this tag for supported architectures and minimum OS versions.
           NOTES

@@ -12,18 +12,16 @@ The source and toolchain are pinned in [toolchain.json](toolchain.json): libwebp
 
 | SwiftPM product | Binary modules | Use |
 | --- | --- | --- |
-| **WebPImageIO** | `WebPDecoder`, `WebPDemux` | Recommended for ImageIOKit: decode pixels, inspect metadata, enumerate frames, and decode animations |
+| **WebPDecoding** | `WebPDecoder`, `WebPDemux` | Decode pixels, inspect metadata, enumerate frames, and decode animations |
 | **WebPFull** | `WebP`, `WebPDemux`, `WebPMux` | Decode, encode, demux, and mux |
 | `WebPDecoder` | `WebPDecoder` | Standalone decoder |
 | `WebP` | `WebP` | Standalone encoder and decoder; includes its SharpYUV dependency |
 | `WebPDemux` | `WebPDemux` | Advanced composition; also link **one** of `WebPDecoder` or `WebP` |
 | `WebPMux` | `WebPMux` | Advanced composition; also link `WebP` for the full mux/animation API |
 
-Choose either `WebPImageIO` or `WebPFull` for a complete dependency set. `WebP` and `WebPDecoder` contain overlapping decoder symbols; do not combine them or combine the two convenience products in one executable. Decoder/demux archives do not contain encoder or SharpYUV code. Binary targets cannot declare dependencies themselves, so convenience products group the required targets explicitly.
+Choose either `WebPDecoding` or `WebPFull` for a complete dependency set. `WebP` and `WebPDecoder` contain overlapping decoder symbols; do not combine them or combine the two convenience products in one executable. Decoder/demux archives do not contain encoder or SharpYUV code. Binary targets cannot declare dependencies themselves, so convenience products group the required targets explicitly.
 
 The four historical module names and `import WebP.Decoder` remain available. Upstream flat header includes and `<webp/decode.h>`-style includes are supported. The old `--enable-swap-16bit-csp` behavior is retained with `WEBP_ENABLE_SWAP_16BIT_CSP=ON`. This affects packed 16-bit output; RGBA output keeps its usual byte order.
-
-A compatibility review found that ImageIOKit currently uses Apple's ImageIO path and has no WebP-Cocoa dependency. This repository provides the binary decoder/demux dependency for future integration; it does not alter ImageIOKit. Existing encoder and mux consumers still have their products.
 
 ## Platforms
 
@@ -53,7 +51,7 @@ dependencies: [
 ],
 targets: [
     .target(name: "YourImageTarget", dependencies: [
-        .product(name: "WebPImageIO", package: "WebP-Cocoa")
+        .product(name: "WebPDecoding", package: "WebP-Cocoa")
     ])
 ]
 ```

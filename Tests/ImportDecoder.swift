@@ -21,4 +21,4 @@ webp.withUnsafeBufferPointer { bytes in
     precondition(WebPDemuxGetI(demux, WEBP_FF_FRAME_COUNT) == 1)
     precondition(WebPDemuxGetI(demux, WEBP_FF_CANVAS_WIDTH) == 2)
 }
-print("Swift WebPImageIO: import, link, decode and demux passed")
+print("Swift WebPDecoding: import, link, decode and demux passed")

@@ -18,7 +18,7 @@ from config import DIST, LOCK, PRODUCTS, ROOT, SLICES
 
 REPOSITORY = "TimOliver/WebP-Cocoa"
 CONVENIENCE_PRODUCTS = {
-    "WebPImageIO": ["WebPDecoder", "WebPDemux"],
+    "WebPDecoding": ["WebPDecoder", "WebPDemux"],
     "WebPFull": ["WebP", "WebPDemux", "WebPMux"],
 }
 

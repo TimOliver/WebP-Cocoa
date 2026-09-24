@@ -220,8 +220,8 @@ let package = Package(
     platforms: [.macOS(.v11)],
     dependencies: [.package(name: "WebPCocoa", path: PACKAGE_PATH)],
     targets: [
-        .executableTarget(name: "ImageIOSmoke", dependencies: [
-            .product(name: "WebPImageIO", package: "WebPCocoa")]),
+        .executableTarget(name: "DecodingSmoke", dependencies: [
+            .product(name: "WebPDecoding", package: "WebPCocoa")]),
         .executableTarget(name: "FullSmoke", dependencies: [
             .product(name: "WebPFull", package: "WebPCocoa")]),
         .executableTarget(name: "DecoderOnlySmoke", dependencies: [
@@ -232,7 +232,7 @@ let package = Package(
     ])
 '''.replace("PACKAGE_PATH", json.dumps(str(package)))
     (consumer / "Package.swift").write_text(manifest)
-    targets = (("ImageIOSmoke", "ImportDecoder.swift"), ("FullSmoke", "ImportFull.swift"),
+    targets = (("DecodingSmoke", "ImportDecoder.swift"), ("FullSmoke", "ImportFull.swift"),
                ("DecoderOnlySmoke", "ImportStandalone.swift"), ("WebPOnlySmoke", "ImportStandalone.swift"))
     for name, source in targets:
         target = consumer / "Sources" / name
@@ -243,7 +243,7 @@ let package = Package(
              "--scratch-path", consumer / ".build", "--cache-path", work / "spm-cache",
              "--config-path", work / "spm-config", "--security-path", work / "spm-security",
              "--manifest-cache", "local", "--disable-sandbox", "-c", "release", name], env=env)
-    print("PASS: real SwiftPM WebPImageIO/WebPFull and standalone WebPDecoder/WebP consumers", flush=True)
+    print("PASS: real SwiftPM WebPDecoding/WebPFull and standalone WebPDecoder/WebP consumers", flush=True)
 
 
 def main():

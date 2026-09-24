@@ -40,7 +40,7 @@ The 2026 pipeline raises the old deployment targets and drops armv7, armv7s, arm
 
 ## Swift Package Manager
 
-Use a **published release tag** from [GitHub Releases](https://github.com/TimOliver/WebP-Cocoa/releases). The first release produced by this pipeline is intended to be `1.6.0`; it is not published merely by checking in these scripts.
+Use a **published release tag** from [GitHub Releases](https://github.com/TimOliver/WebP-Cocoa/releases). The first release produced by this pipeline is intended to be `v1.6.0`; it is not published merely by checking in these scripts. Public tags and release names use the `v` prefix; SwiftPM version requirements remain numeric, as shown below.
 
 After that release is published:
 
@@ -95,7 +95,7 @@ Automated validation covers XCFramework platform/architecture metadata, static a
 
 ## Release process
 
-The **Build and release libwebp** workflow runs builds and validation on pull requests and pushes. Its manually dispatched release path accepts the pinned SemVer version and uses the repository's scoped `GITHUB_TOKEN`; no personal token or Fastlane secrets are required. Actions are pinned to immutable commits. The runner family is explicit; hosted images can still change, so exact compiler/SDK checks fail if the pinned Xcode is removed.
+The **Build and release libwebp** workflow runs builds and validation on pull requests and pushes. Its manually dispatched release path requires the pinned version with a `v` prefix, such as `v1.6.0`, and uses that exact value for both the public tag and release name. The upstream version in `toolchain.json` remains `1.6.0`. The workflow uses the repository's scoped `GITHUB_TOKEN`; no personal token or Fastlane secrets are required. Actions are pinned to immutable commits. The runner family is explicit; hosted images can still change, so exact compiler/SDK checks fail if the pinned Xcode is removed.
 
 The workflow builds all platforms, runs tests, creates the four ZIPs, and computes `SHA256SUMS` plus a remote `Package.swift`. It creates a release commit containing that manifest and pushes a unique `candidate-…` tag pointing at that exact commit, without changing `main`. This candidate tag is not a SwiftPM version. Existing tags/assets are never overwritten.
 
@@ -105,7 +105,7 @@ With publishing disabled, there is no public SemVer tag pointing at private asse
 
 ```sh
 gh release edit CANDIDATE_TAG --repo TimOliver/WebP-Cocoa \
-  --tag 1.6.0 --target CANDIDATE_COMMIT_SHA --draft=false
+  --tag v1.6.0 --target CANDIDATE_COMMIT_SHA --title v1.6.0 --draft=false
 ```
 
 Do not simply publish the candidate under its temporary tag: the generated manifest URLs refer to the final version. The workflow's publish option performs this promotion and the subsequent public consumer test automatically.
@@ -113,9 +113,9 @@ Do not simply publish the candidate under its temporary tag: the generated manif
 For local release preparation on the exact toolchain:
 
 ```sh
-python3 scripts/distribution.py package --tag 1.6.0
+python3 scripts/distribution.py package --tag v1.6.0
 # Review dist/release/Package.swift, SHA256SUMS, and build-info.json.
-python3 scripts/distribution.py verify --directory dist/release --tag 1.6.0
+python3 scripts/distribution.py verify --directory dist/release --tag v1.6.0
 ```
 
 Packaging refuses incomplete architecture sets, development toolchain overrides, missing license files, or an existing `dist/release` directory. ZIP ordering, timestamps, and permissions are normalized; compiler/tool versions and flags are recorded in provenance. This does not promise bit-for-bit compiler output across different macOS hosts.

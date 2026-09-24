@@ -32,9 +32,9 @@ def sha256(path):
 
 
 def validate_tag(tag):
-    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", tag):
-        raise ValueError("Use a plain SemVer tag, for example 1.6.0")
-    if tag != LOCK["libwebp"]["version"]:
+    if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
+        raise ValueError("Use a v-prefixed release tag, for example v1.6.0")
+    if tag[1:] != LOCK["libwebp"]["version"]:
         raise ValueError(f"Tag {tag} differs from pinned libwebp {LOCK['libwebp']['version']}")
     return tag
 

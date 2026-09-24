@@ -4,10 +4,13 @@ import copy
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import plistlib
+import subprocess
 import sys
 import tempfile
+import textwrap
 import unittest
 from unittest import mock
 import zipfile
@@ -15,6 +18,41 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import distribution
 from config import LOCK, PRODUCTS, SLICES
+
+
+class ReleaseWorkflowTests(unittest.TestCase):
+    def setUp(self):
+        self.repository = Path(__file__).resolve().parents[1]
+        self.workflow = (self.repository / ".github/workflows/package.yml").read_text()
+
+    def test_workflow_validates_and_exports_prefixed_tag(self):
+        script = textwrap.dedent(self.workflow.split("python3 - <<'PY'\n", 1)[1]
+                                 .split("\n          PY", 1)[0])
+        tag = f"v{LOCK['libwebp']['version']}"
+        cases = [("push", "", True), ("pull_request", "", True),
+                 ("workflow_dispatch", tag, True),
+                 ("workflow_dispatch", tag[1:], False),
+                 ("workflow_dispatch", "v0.0.0", False),
+                 ("workflow_dispatch", f"v{tag}", False)]
+        for event, requested, valid in cases:
+            with self.subTest(event=event, requested=requested), tempfile.TemporaryDirectory() as directory:
+                output = Path(directory) / "output"
+                result = subprocess.run(
+                    [sys.executable, "-c", script], cwd=self.repository,
+                    env={**os.environ, "GITHUB_EVENT_NAME": event, "REQUESTED_VERSION": requested,
+                         "GITHUB_OUTPUT": str(output), "PYTHONDONTWRITEBYTECODE": "1"},
+                    capture_output=True, text=True)
+                if valid:
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(output.read_text(), f"tag={tag}\n")
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertFalse(output.exists())
+
+    def test_draft_and_published_release_titles_match_tag(self):
+        self.assertIn('--verify-tag --draft --title "$RELEASE_TAG"', self.workflow)
+        self.assertIn('--tag "$RELEASE_TAG" --target "$RELEASE_COMMIT" --title "$RELEASE_TAG"',
+                      self.workflow)
 
 
 class ReleaseTests(unittest.TestCase):
@@ -25,7 +63,7 @@ class ReleaseTests(unittest.TestCase):
         self.dist = self.root / "dist"
         self.dist.mkdir()
         self.lock = copy.deepcopy(LOCK)
-        self.tag = self.lock["libwebp"]["version"]
+        self.tag = f"v{self.lock['libwebp']['version']}"
         self.repository = "FixtureOwner/WebP-Cocoa"
         for name, value in (("ROOT", self.root), ("DIST", self.dist), ("LOCK", self.lock)):
             patcher = mock.patch.object(distribution, name, value)
@@ -126,8 +164,13 @@ class ReleaseTests(unittest.TestCase):
         distribution.zip_framework(framework, second)
         self.assertEqual(first.read_bytes(), second.read_bytes())
 
+    def test_accepts_v_prefixed_pinned_tag(self):
+        self.assertEqual(distribution.validate_tag(self.tag), self.tag)
+        self.assertEqual(self.lock["libwebp"]["version"], self.tag[1:])
+
     def test_rejects_invalid_or_unpinned_tags_before_packaging(self):
-        for tag in (f"v{self.tag}", "0.0.0", f"{self.tag}-rc1", "../1.6.0", ""):
+        for tag in (self.tag[1:], f"v{self.tag}", self.tag.upper(), "v0.0.0",
+                    f"{self.tag}-rc1", "../v1.6.0", ""):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 distribution.package(tag, self.repository)
         self.assertFalse((self.dist / "release").exists())

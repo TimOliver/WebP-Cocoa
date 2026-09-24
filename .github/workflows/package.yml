@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release tag, exactly matching toolchain.json (for example 1.6.0)'
+        description: 'Release tag: v plus the toolchain.json version (for example v1.6.0)'
         required: true
         type: string
       publish:
@@ -31,7 +31,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 90
     outputs:
-      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -45,13 +45,15 @@ jobs:
           REQUESTED_VERSION: ${{ inputs.version }}
         run: |
           python3 - <<'PY'
-          import json, os
-          lock = json.load(open("toolchain.json"))
-          version = lock["libwebp"]["version"]
+          import os, sys
+          sys.path.insert(0, "scripts")
+          from config import LOCK
+          from distribution import validate_tag
+          tag = validate_tag(f"v{LOCK['libwebp']['version']}")
           if os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch":
-              assert os.environ["REQUESTED_VERSION"] == version, "Update the source/toolchain lock before releasing a different version"
+              validate_tag(os.environ["REQUESTED_VERSION"])
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
-              output.write(f"version={version}\n")
+              output.write(f"tag={tag}\n")
           PY
       - name: Install the pinned CMake and Ninja binaries
         run: bash scripts/bootstrap-tools.sh
@@ -63,10 +65,10 @@ jobs:
         run: python3 scripts/test-artifacts.py
       - name: Package complete release assets
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: |
-          python3 scripts/distribution.py package --tag "$VERSION" --repository "$GITHUB_REPOSITORY"
-          python3 scripts/distribution.py verify --directory dist/release --tag "$VERSION" --repository "$GITHUB_REPOSITORY"
+          python3 scripts/distribution.py package --tag "$RELEASE_TAG" --repository "$GITHUB_REPOSITORY"
+          python3 scripts/distribution.py verify --directory dist/release --tag "$RELEASE_TAG" --repository "$GITHUB_REPOSITORY"
       - name: Retain tested release assets
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -93,7 +95,7 @@ jobs:
     permissions:
       contents: write
     env:
-      VERSION: ${{ needs.build.outputs.version }}
+      RELEASE_TAG: ${{ needs.build.outputs.tag }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -107,13 +109,13 @@ jobs:
           name: release-candidate
           path: dist/release
       - name: Verify the transferred release bytes
-        run: python3 scripts/distribution.py verify --directory dist/release --tag "$VERSION" --repository "$GITHUB_REPOSITORY"
+        run: python3 scripts/distribution.py verify --directory dist/release --tag "$RELEASE_TAG" --repository "$GITHUB_REPOSITORY"
       - name: Create the release manifest commit and candidate tag
         run: |
           # A public SemVer tag would be selected by SwiftPM even while its
           # release assets are private. Stage under a non-SemVer tag instead.
-          if git show-ref --verify --quiet "refs/tags/$VERSION"; then
-            echo "Release tag $VERSION already exists; refusing to replace it" >&2
+          if git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"; then
+            echo "Release tag $RELEASE_TAG already exists; refusing to replace it" >&2
             exit 1
           fi
           git switch --detach "$GITHUB_SHA"
@@ -121,10 +123,10 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add Package.swift
-          git commit -m "Release libwebp $VERSION binary package"
-          CANDIDATE_TAG="candidate-$VERSION-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git commit -m "Release libwebp $RELEASE_TAG binary package"
+          CANDIDATE_TAG="candidate-$RELEASE_TAG-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
           RELEASE_COMMIT="$(git rev-parse HEAD)"
-          git tag -a "$CANDIDATE_TAG" -m "Candidate for libwebp $VERSION"
+          git tag -a "$CANDIDATE_TAG" -m "Candidate for libwebp $RELEASE_TAG"
           git push origin "refs/tags/$CANDIDATE_TAG"
           echo "CANDIDATE_TAG=$CANDIDATE_TAG" >> "$GITHUB_ENV"
           echo "RELEASE_COMMIT=$RELEASE_COMMIT" >> "$GITHUB_ENV"
@@ -138,12 +140,12 @@ jobs:
           Each XCFramework includes upstream licenses. SHA256SUMS covers the binary archives, generated SwiftPM manifest and build provenance. See the README at this tag for supported architectures and minimum OS versions.
           NOTES
           gh release create "$CANDIDATE_TAG" dist/release/* --repo "$GITHUB_REPOSITORY" \
-            --verify-tag --draft --title "libwebp $VERSION" --notes-file "$RUNNER_TEMP/release-notes.md"
+            --verify-tag --draft --title "$RELEASE_TAG" --notes-file "$RUNNER_TEMP/release-notes.md"
       - name: Test the assets downloaded from the draft release
         run: |
           gh release download "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/downloaded-release"
           python3 scripts/distribution.py verify --directory "$RUNNER_TEMP/downloaded-release" \
-            --tag "$VERSION" --repository "$GITHUB_REPOSITORY" --extract-to "$RUNNER_TEMP/release-consumer"
+            --tag "$RELEASE_TAG" --repository "$GITHUB_REPOSITORY" --extract-to "$RUNNER_TEMP/release-consumer"
           python3 scripts/test-artifacts.py --dist "$RUNNER_TEMP/release-consumer/dist" --package "$RUNNER_TEMP/release-consumer"
       - name: Record the tested draft for later promotion
         run: |
@@ -155,17 +157,17 @@ jobs:
       - name: Publish the tested draft
         if: inputs.publish
         run: |
-          REMOTE_VERSION="$(git ls-remote --tags origin "refs/tags/$VERSION")"
+          REMOTE_VERSION="$(git ls-remote --tags origin "refs/tags/$RELEASE_TAG")"
           if [[ -n "$REMOTE_VERSION" ]]; then
-            echo "Release tag $VERSION already exists; refusing to replace it" >&2
+            echo "Release tag $RELEASE_TAG already exists; refusing to replace it" >&2
             exit 1
           fi
           # GitHub creates the final tag at the exact commit when publishing.
           # Keep the candidate tag as provenance; never rewrite a source branch.
           gh release edit "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --tag "$VERSION" --target "$RELEASE_COMMIT" --draft=false
-          git fetch origin "refs/tags/$VERSION:refs/tags/$VERSION"
-          test "$(git rev-parse "$VERSION^{commit}")" = "$RELEASE_COMMIT"
+            --tag "$RELEASE_TAG" --target "$RELEASE_COMMIT" --title "$RELEASE_TAG" --draft=false
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$RELEASE_COMMIT"
       - name: Test public SwiftPM URLs after publication
         if: inputs.publish
         # Draft assets require authentication, so public binary-target URL

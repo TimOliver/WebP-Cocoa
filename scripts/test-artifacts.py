@@ -102,11 +102,28 @@ def artifact_slices(dist, selected, work):
             require(set(entry["SupportedArchitectures"]) == set(expected["archs"]),
                     f"{product}/{name}: plist architecture mismatch")
             slice_root = bundle / entry["LibraryIdentifier"]
-            library = slice_root / entry["LibraryPath"]
-            headers = slice_root / entry["HeadersPath"]
-            require(library.name == f"lib{specification['library']}.a",
-                    f"{product}/{name}: expected a static lib{specification['library']}.a")
-            require((headers / "module.modulemap").is_file(), f"{product}/{name}: missing module map")
+            # Xcode copies all raw-library HeadersPath contents into one include
+            # directory. Named framework bundles keep products' duplicate
+            # upstream header names and module maps in separate namespaces.
+            require(entry["LibraryPath"] == f"{product}.framework",
+                    f"{product}/{name}: expected a named static framework")
+            require("HeadersPath" not in entry,
+                    f"{product}/{name}: raw-library headers collide during Xcode staging")
+            framework = slice_root / entry["LibraryPath"]
+            library = framework / product
+            headers = framework / "Headers"
+            module_map = framework / "Modules" / "module.modulemap"
+            require(module_map.is_file(), f"{product}/{name}: missing framework module map")
+            require(f"framework module {product} [system]" in module_map.read_text(),
+                    f"{product}/{name}: expected framework module declaration")
+            require(not (headers / "module.modulemap").exists(),
+                    f"{product}/{name}: module map belongs in framework Modules")
+            with (framework / "Info.plist").open("rb") as file:
+                framework_info = plistlib.load(file)
+            require(framework_info.get("CFBundleExecutable") == product and
+                    framework_info.get("CFBundleName") == product and
+                    framework_info.get("CFBundlePackageType") == "FMWK",
+                    f"{product}/{name}: invalid framework bundle metadata")
             for header in specification["headers"]:
                 require((headers / header).is_file(), f"{product}/{name}: missing {header}")
                 require((headers / "webp" / header).is_file(),
@@ -158,38 +175,39 @@ def compile_slices(artifacts, selected, work, env):
             target = triple(name, arch)
             for flavor in ("Decoder", "Full"):
                 headers, libraries = options(artifacts, name, flavor)
+                frameworks = [argument for header in headers for argument in ("-F", header.parent.parent)]
                 includes = [argument for header in headers for argument in ("-I", header)]
                 common = ["xcrun", "clang", "-target", target, "-isysroot", sdk,
-                          "-Wall", "-Wextra", "-Werror", *includes]
+                          "-Wall", "-Wextra", "-Werror"]
                 objc = destination / f"import-{flavor}"
-                run([*common, "-fmodules", f"-fmodules-cache-path={work / 'clang-cache'}",
+                run([*common, *frameworks, "-fmodules", f"-fmodules-cache-path={work / 'clang-cache'}",
                      TESTS / f"Import{flavor}.m", *libraries, "-o", objc], env=env)
                 c = destination / f"headers-{flavor}"
-                run([*common, f"-DWEBP_FULL={int(flavor == 'Full')}", TESTS / "Headers.c",
+                run([*common, *includes, f"-DWEBP_FULL={int(flavor == 'Full')}", TESTS / "Headers.c",
                      *libraries, "-o", c], env=env)
                 swift = destination / f"swift-{flavor}"
                 run(["xcrun", "--sdk", SLICES[name]["sdk"], "swiftc", "-target", target, "-sdk", sdk,
-                     "-module-cache-path", work / "swift-cache", *includes,
+                     "-module-cache-path", work / "swift-cache", *frameworks,
                      TESTS / f"Import{flavor}.swift", *libraries, "-o", swift], env=env)
                 if name == "macos" and arch == host:
                     for executable in (objc, c, swift):
                         run([executable], env=env)
             # Prove the primary binary products also import with only their own
-            # header search path; the combined consumers must not mask a missing
+            # framework search path; the combined consumers must not mask a missing
             # standalone header or module dependency.
             for product in ("WebPDecoder", "WebP"):
                 headers, library = artifacts[product, name]
                 decoder = product == "WebPDecoder"
                 objc = destination / f"standalone-objc-{product}"
                 run(["xcrun", "clang", "-target", target, "-isysroot", sdk,
-                     "-Wall", "-Wextra", "-Werror", "-I", headers, "-fmodules",
+                     "-Wall", "-Wextra", "-Werror", "-F", headers.parent.parent, "-fmodules",
                      f"-fmodules-cache-path={work / 'clang-cache'}",
                      f"-DWEBP_DECODER_ONLY={int(decoder)}", TESTS / "ImportStandalone.m",
                      library, "-o", objc], env=env)
                 swift = destination / f"standalone-swift-{product}"
                 defines = ["-D", "WEBP_DECODER_ONLY"] if decoder else []
                 run(["xcrun", "--sdk", SLICES[name]["sdk"], "swiftc", "-target", target, "-sdk", sdk,
-                     "-module-cache-path", work / "swift-cache", "-I", headers,
+                     "-module-cache-path", work / "swift-cache", "-F", headers.parent.parent,
                      *defines, TESTS / "ImportStandalone.swift", library, "-o", swift], env=env)
                 if name == "macos" and arch == host:
                     run([objc], env=env)

@@ -4,9 +4,9 @@
 
 # WebP-Cocoa
 
-Static [libwebp](https://chromium.googlesource.com/webm/libwebp/) XCFrameworks for Apple platforms, built directly from upstream CMake with Ninja. SwiftPM packages and manual downloads use the same checksummed GitHub Release archives.
+Static [libwebp](https://chromium.googlesource.com/webm/libwebp/) XCFrameworks for Apple platforms, built directly from upstream CMake with Ninja. Each slice contains a named static `.framework` bundle that keeps its headers and module map separate from the other products. SwiftPM packages and manual downloads use the same checksummed GitHub Release archives.
 
-The source and toolchain are pinned in [toolchain.json](toolchain.json): libwebp **1.6.0**, Xcode **26.3 (17C529)** with Apple **26.2 SDKs**, CMake **4.1.1**, Ninja **1.13.2**, and CI Python **3.13.7**. The official source archive and downloaded build tools are SHA-256 verified before use. No Autotools, Fastlane, Ruby, Homebrew installation, or bitcode is required.
+Package **1.6.1** contains upstream libwebp **1.6.0**. Package versions can advance independently when packaging changes; they do not imply a new upstream codec version. The source and toolchain are pinned in [toolchain.json](toolchain.json): libwebp **1.6.0**, Xcode **26.3 (17C529)** with Apple **26.2 SDKs**, CMake **4.1.1**, Ninja **1.13.2**, and CI Python **3.13.7**. The official source archive and downloaded build tools are SHA-256 verified before use. No Autotools, Fastlane, Ruby, Homebrew installation, or bitcode is required.
 
 ## Products and compatibility
 
@@ -21,7 +21,7 @@ The source and toolchain are pinned in [toolchain.json](toolchain.json): libwebp
 
 Choose either `WebPDecoding` or `WebPFull` for a complete dependency set. `WebP` and `WebPDecoder` contain overlapping decoder symbols; do not combine them or combine the two convenience products in one executable. Decoder/demux archives do not contain encoder or SharpYUV code. Binary targets cannot declare dependencies themselves, so convenience products group the required targets explicitly.
 
-The four historical module names and `import WebP.Decoder` remain available. Upstream flat header includes and `<webp/decode.h>`-style includes are supported. The old `--enable-swap-16bit-csp` behavior is retained with `WEBP_ENABLE_SWAP_16BIT_CSP=ON`. This affects packed 16-bit output; RGBA output keeps its usual byte order.
+The four historical module names and `import WebP.Decoder` remain available. C and Objective-C consumers can use namespaced includes such as `<WebPDecoder/decode.h>` and `<WebPDemux/demux.h>`. The original flat headers and `webp/` forwarding headers remain inside each framework's `Headers` directory for consumers that explicitly add that directory to their header search paths. The old `--enable-swap-16bit-csp` behavior is retained with `WEBP_ENABLE_SWAP_16BIT_CSP=ON`. This affects packed 16-bit output; RGBA output keeps its usual byte order.
 
 ## Platforms
 
@@ -40,14 +40,14 @@ The 2026 pipeline raises the old deployment targets and drops armv7, armv7s, arm
 
 ## Swift Package Manager
 
-Use a **published release tag** from [GitHub Releases](https://github.com/TimOliver/WebP-Cocoa/releases). The first release produced by this pipeline is intended to be `v1.6.0`; it is not published merely by checking in these scripts. Public tags and release names use the `v` prefix; SwiftPM version requirements remain numeric, as shown below.
+Use a **published release tag** from [GitHub Releases](https://github.com/TimOliver/WebP-Cocoa/releases). Use **v1.6.1 or later** for Xcode integration. The v1.6.0 artifacts used raw static libraries whose headers collided when Xcode staged multiple products together. v1.6.1 fixes the packaging with named static framework bundles. The v1.6.0 release assets and checksums are preserved. Public tags and release names use the `v` prefix; SwiftPM version requirements remain numeric, as shown below.
 
-After that release is published:
+Add the package and select the decoding product:
 
 ```swift
 // In your Package.swift:
 dependencies: [
-    .package(url: "https://github.com/TimOliver/WebP-Cocoa.git", exact: "1.6.0")
+    .package(url: "https://github.com/TimOliver/WebP-Cocoa.git", exact: "1.6.1")
 ],
 targets: [
     .target(name: "YourImageTarget", dependencies: [
@@ -77,6 +77,7 @@ bash scripts/bootstrap-tools.sh
 export PATH="$PWD/build/tools/bin:$PATH"
 ./build.sh all
 python3 scripts/test-artifacts.py
+python3 scripts/test-xcode-consumer.py
 python3 -m unittest discover -s Tests -p 'test_*.py'
 ```
 
@@ -91,11 +92,11 @@ Such builds are marked in `dist/build-info.json` and cannot be packaged as relea
 
 Source downloads and build logs live in `build/`; outputs live in `dist/`. Each configure uses a fresh per-architecture CMake cache to avoid stale SIMD and platform checks. The build uses upstream `webpdecoder`, `webpdemux`, `webp`, and `libwebpmux` targets. It merges SharpYUV only into `WebP`, since CMake's static target dependencies are not physically included in `libwebp.a`.
 
-Automated validation covers XCFramework platform/architecture metadata, static archive contents, public headers, C/Objective-C and Swift imports, `WebP.Decoder` compatibility, and executable links for every advertised architecture. Host macOS tests decode known lossy/lossless pixels, reject malformed data, extract metadata, iterate animation frames, exercise animation decoding, and check full-codec encoding and muxing. SwiftPM consumers import and link the actual binary products. Cross-platform link tests do not claim on-device runtime coverage.
+Automated validation covers XCFramework platform/architecture metadata, static archive contents, public headers, C/Objective-C and Swift imports, `WebP.Decoder` compatibility, and executable links for every advertised architecture. Host macOS tests decode known lossy/lossless pixels, reject malformed data, extract metadata, iterate animation frames, exercise animation decoding, and check full-codec encoding and muxing. SwiftPM consumers import and link the actual binary products. A checked-in Xcode iOS app project also consumes `WebPDecoding` and `WebPFull` through SwiftPM, and `xcodebuild` builds each target for generic iOS device and simulator destinations. This exercises `ProcessXCFramework` and detects shared staging-output collisions that `swift build` cannot catch. Release CI repeats it against downloaded assets before publication and public binary URLs afterward. Cross-platform build/link tests do not claim on-device runtime coverage.
 
 ## Release process
 
-The **Build and release libwebp** workflow runs builds and validation on pull requests and pushes. Its manually dispatched release path requires the pinned version with a `v` prefix, such as `v1.6.0`, and uses that exact value for both the public tag and release name. The upstream version in `toolchain.json` remains `1.6.0`. The workflow uses the repository's scoped `GITHUB_TOKEN`; no personal token or Fastlane secrets are required. Actions are pinned to immutable commits. The runner family is explicit; hosted images can still change, so exact compiler/SDK checks fail if the pinned Xcode is removed.
+The **Build and release libwebp** workflow runs builds and validation on pull requests and pushes. Its manually dispatched release path requires `package_version` from `toolchain.json` with a `v` prefix, such as `v1.6.1`, and uses that exact value for both the public tag and release name. The upstream version in `toolchain.json` remains `1.6.0`. The workflow uses the repository's scoped `GITHUB_TOKEN`; no personal token or Fastlane secrets are required. Actions are pinned to immutable commits. The runner family is explicit; hosted images can still change, so exact compiler/SDK checks fail if the pinned Xcode is removed.
 
 The workflow builds all platforms, runs tests, creates the four ZIPs, and computes `SHA256SUMS` plus a remote `Package.swift`. It creates a release commit containing that manifest and pushes a unique `candidate-…` tag pointing at that exact commit, without changing `main`. This candidate tag is not a SwiftPM version. Existing tags/assets are never overwritten.
 
@@ -105,7 +106,7 @@ With publishing disabled, there is no public SemVer tag pointing at private asse
 
 ```sh
 gh release edit CANDIDATE_TAG --repo TimOliver/WebP-Cocoa \
-  --tag v1.6.0 --target CANDIDATE_COMMIT_SHA --title v1.6.0 --draft=false
+  --tag v1.6.1 --target CANDIDATE_COMMIT_SHA --title v1.6.1 --draft=false
 ```
 
 Do not simply publish the candidate under its temporary tag: the generated manifest URLs refer to the final version. The workflow's publish option performs this promotion and the subsequent public consumer test automatically.
@@ -113,14 +114,14 @@ Do not simply publish the candidate under its temporary tag: the generated manif
 For local release preparation on the exact toolchain:
 
 ```sh
-python3 scripts/distribution.py package --tag v1.6.0
+python3 scripts/distribution.py package --tag v1.6.1
 # Review dist/release/Package.swift, SHA256SUMS, and build-info.json.
-python3 scripts/distribution.py verify --directory dist/release --tag v1.6.0
+python3 scripts/distribution.py verify --directory dist/release --tag v1.6.1
 ```
 
 Packaging refuses incomplete architecture sets, development toolchain overrides, missing license files, or an existing `dist/release` directory. ZIP ordering, timestamps, and permissions are normalized; compiler/tool versions and flags are recorded in provenance. This does not promise bit-for-bit compiler output across different macOS hosts.
 
-To update libwebp, change its version, official archive URL and verified checksum in `toolchain.json`, inspect the upstream CMake targets and dependencies, and run the complete validation before releasing. Update the bootstrap tool hashes together with any CMake/Ninja pins. Use a new release version for changed binary bytes; never replace an existing release archive.
+For a packaging-only fix, advance `package_version` while keeping the upstream source pin unchanged. To update libwebp, change its version, official archive URL and verified checksum in `toolchain.json` and advance `package_version`, inspect the upstream CMake targets and dependencies, and run the complete validation before releasing. Update the bootstrap tool hashes together with any CMake/Ninja pins. Use a new package version and release tag for changed binary bytes; never replace an existing release archive or its checksum.
 
 ## License and credits
 

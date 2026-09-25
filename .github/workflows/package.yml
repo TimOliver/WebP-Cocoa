@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release tag: v plus the toolchain.json version (for example v1.6.0)'
+        description: 'Release tag: v plus toolchain.json package_version (for example v1.6.1)'
         required: true
         type: string
       publish:
@@ -49,7 +49,7 @@ jobs:
           sys.path.insert(0, "scripts")
           from config import LOCK
           from distribution import validate_tag
-          tag = validate_tag(f"v{LOCK['libwebp']['version']}")
+          tag = validate_tag(f"v{LOCK['package_version']}")
           if os.environ["GITHUB_EVENT_NAME"] == "workflow_dispatch":
               validate_tag(os.environ["REQUESTED_VERSION"])
           with open(os.environ["GITHUB_OUTPUT"], "a") as output:
@@ -63,6 +63,8 @@ jobs:
         run: ./build.sh all
       - name: Test module imports, static linking, decoding, demux and SwiftPM
         run: python3 scripts/test-artifacts.py
+      - name: Test Xcode iOS consumer staging, imports, linking and decoding
+        run: python3 scripts/test-xcode-consumer.py
       - name: Package complete release assets
         env:
           RELEASE_TAG: ${{ steps.version.outputs.tag }}
@@ -84,6 +86,8 @@ jobs:
           path: |
             build/logs/
             dist/build-info.json
+            build/tests/xcode-consumer-*/*.log
+            build/tests/xcode-consumer-*/*.xcresult/
           if-no-files-found: ignore
           retention-days: 14
 
@@ -132,8 +136,17 @@ jobs:
           echo "RELEASE_COMMIT=$RELEASE_COMMIT" >> "$GITHUB_ENV"
       - name: Upload a draft GitHub Release
         run: |
-          cat > "$RUNNER_TEMP/release-notes.md" <<'NOTES'
-          Static libwebp XCFrameworks for macOS, iOS, Mac Catalyst, tvOS, watchOS and visionOS.
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          provenance = json.loads(Path("dist/release/build-info.json").read_text())
+          title = f"Package v{provenance['package_version']} uses upstream libwebp {provenance['libwebp']['version']}.\n\n"
+          Path(os.environ["RUNNER_TEMP"], "release-notes.md").write_text(title)
+          PY
+          cat >> "$RUNNER_TEMP/release-notes.md" <<'NOTES'
+          This packaging update fixes Xcode's duplicate header and module map outputs by placing each product's headers and module map inside its own named static framework bundle. The libwebp source version is tracked independently from the package release version. Existing release assets and checksums remain unchanged.
+
+          Static XCFrameworks support macOS, iOS, Mac Catalyst, tvOS, watchOS and visionOS. Release CI builds and links real iOS SwiftPM app consumers with xcodebuild for device and simulator destinations, and runs decode and demux tests on macOS, including against downloaded release assets.
 
           Use the WebPDecoding SwiftPM product for decoder + demux, or WebPFull for encoding, decoding and mux/demux. The four individual products remain available. WebP and WebPDecoder contain overlapping decoder symbols and must not be linked together.
 
@@ -147,6 +160,7 @@ jobs:
           python3 scripts/distribution.py verify --directory "$RUNNER_TEMP/downloaded-release" \
             --tag "$RELEASE_TAG" --repository "$GITHUB_REPOSITORY" --extract-to "$RUNNER_TEMP/release-consumer"
           python3 scripts/test-artifacts.py --dist "$RUNNER_TEMP/release-consumer/dist" --package "$RUNNER_TEMP/release-consumer"
+          python3 scripts/test-xcode-consumer.py --package "$RUNNER_TEMP/release-consumer"
       - name: Record the tested draft for later promotion
         run: |
           {
@@ -173,4 +187,16 @@ jobs:
         # Draft assets require authentication, so public binary-target URL
         # resolution is only testable after publication. Use the committed
         # remote manifest and downloaded binaries for the direct-link checks.
-        run: python3 scripts/test-artifacts.py --slices macos --dist "$RUNNER_TEMP/release-consumer/dist" --package "$GITHUB_WORKSPACE"
+        run: |
+          python3 scripts/test-artifacts.py --slices macos --dist "$RUNNER_TEMP/release-consumer/dist" --package "$GITHUB_WORKSPACE"
+          python3 scripts/test-xcode-consumer.py --package "$GITHUB_WORKSPACE"
+      - name: Retain release Xcode consumer diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: release-xcode-diagnostics
+          path: |
+            build/tests/xcode-consumer-*/*.log
+            build/tests/xcode-consumer-*/*.xcresult/
+          if-no-files-found: ignore
+          retention-days: 14

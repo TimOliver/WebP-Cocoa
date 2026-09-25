@@ -1,10 +1,11 @@
-"""Portable build-contract tests; compiler/link/decode checks live in smoke.py."""
+"""Portable build-contract tests; compiler/link/decode checks live in test-artifacts.py."""
 import contextlib
 import copy
 import hashlib
 import io
 import os
 from pathlib import Path
+import plistlib
 import sys
 import tarfile
 import tempfile
@@ -195,6 +196,11 @@ class DistributionInputsTests(unittest.TestCase):
                 commands.append(args)
                 Path(args[args.index("-output") + 1]).mkdir(parents=True)
             selected = ["ios", "ios-simulator", "catalyst"]
+            for slice_name in selected:
+                for name, product in PRODUCTS.items():
+                    archive = root / "build" / "slices" / slice_name / name / f"lib{product['library']}.a"
+                    archive.parent.mkdir(parents=True)
+                    archive.write_bytes(f"!<arch>\n{name}/{slice_name}\n".encode())
             with mock.patch.object(build, "BUILD", root / "build"), \
                  mock.patch.object(build, "DIST", root / "dist"), \
                  mock.patch.object(build, "ROOT", root), \
@@ -203,24 +209,42 @@ class DistributionInputsTests(unittest.TestCase):
                 build.create_xcframeworks(source, selected)
             self.assertEqual(set(PRODUCTS), {"WebP", "WebPDecoder", "WebPDemux", "WebPMux"})
             self.assertEqual(len(commands), 4)
-            for name, product in PRODUCTS.items():
-                headers = root / "build" / "headers" / name
-                module = (headers / "module.modulemap").read_text()
-                self.assertIn(f"module {name} [system]", module)
-                if name == "WebP":
-                    self.assertIn("module Decoder", module)
-                for header in product["headers"]:
-                    self.assertEqual((headers / header).read_bytes(), (source / "src" / "webp" / header).read_bytes())
-                    self.assertEqual((headers / "webp" / header).read_text(), f'#include "../{header}"\n')
-                    self.assertIn(f'header "{header}"', module)
+            bundle_identifiers = set()
+            for command in commands:
+                output = Path(command[command.index("-output") + 1])
+                name = output.stem
+                product = PRODUCTS[name]
+                frameworks = [Path(command[index + 1]) for index, arg in enumerate(command) if arg == "-framework"]
+                self.assertEqual(len(frameworks), len(selected))
+                self.assertNotIn("-headers", command)
+                self.assertNotIn("-library", command)
+                for slice_name, framework in zip(selected, frameworks):
+                    with self.subTest(product=name, slice=slice_name):
+                        self.assertEqual(framework.name, f"{name}.framework")
+                        self.assertEqual((framework / name).read_bytes(), f"!<arch>\n{name}/{slice_name}\n".encode())
+                        headers = framework / "Headers"
+                        self.assertFalse((headers / "module.modulemap").exists())
+                        module = (framework / "Modules" / "module.modulemap").read_text()
+                        self.assertIn(f"framework module {name} [system]", module)
+                        if name == "WebP":
+                            self.assertIn("module Decoder", module)
+                        for header in product["headers"]:
+                            self.assertEqual((headers / header).read_bytes(), (source / "src" / "webp" / header).read_bytes())
+                            self.assertEqual((headers / "webp" / header).read_text(), f'#include "../{header}"\n')
+                            self.assertIn(f'header "{header}"', module)
+                        with (framework / "Info.plist").open("rb") as file:
+                            info = plistlib.load(file)
+                        self.assertEqual(info["CFBundleExecutable"], name)
+                        self.assertEqual(info["CFBundleName"], name)
+                        self.assertEqual(info["CFBundlePackageType"], "FMWK")
+                        self.assertTrue(info["CFBundleVersion"])
+                        self.assertTrue(info["CFBundleShortVersionString"])
+                        bundle_identifiers.add(info["CFBundleIdentifier"])
                 licenses = root / "dist" / f"{name}.xcframework" / "Licenses"
                 for license_name in ("COPYING", "PATENTS", "AUTHORS"):
                     self.assertEqual((licenses / license_name).read_bytes(), (source / license_name).read_bytes())
                 self.assertEqual((licenses / "WebP-Cocoa-LICENSE").read_bytes(), (root / "LICENSE").read_bytes())
-            for command in commands:
-                libraries = [Path(command[index + 1]) for index, arg in enumerate(command) if arg == "-library"]
-                self.assertEqual([path.parent.parent.name for path in libraries], selected)
-                self.assertEqual(command.count("-headers"), len(selected))
+            self.assertEqual(len(bundle_identifiers), len(PRODUCTS))
 
 
 if __name__ == "__main__":

@@ -33,9 +33,9 @@ def sha256(path):
 
 def validate_tag(tag):
     if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+", tag):
-        raise ValueError("Use a v-prefixed release tag, for example v1.6.0")
-    if tag[1:] != LOCK["libwebp"]["version"]:
-        raise ValueError(f"Tag {tag} differs from pinned libwebp {LOCK['libwebp']['version']}")
+        raise ValueError("Use a v-prefixed release tag, for example v1.6.1")
+    if tag[1:] != LOCK["package_version"]:
+        raise ValueError(f"Tag {tag} differs from pinned package version {LOCK['package_version']}")
     return tag
 
 
@@ -103,15 +103,28 @@ def validate_xcframework(path):
     if len(libraries) != len(SLICES) or actual != expected:
         raise ValueError(f"{path.name} is incomplete; release packaging requires all {len(SLICES)} slices")
     for entry in libraries:
-        for field in ("LibraryIdentifier", "LibraryPath", "HeadersPath"):
+        for field in ("LibraryIdentifier", "LibraryPath"):
             value = Path(entry[field])
             if value.is_absolute() or ".." in value.parts:
                 raise ValueError(f"Unsafe {field} in {path.name}")
-        library = path / entry["LibraryIdentifier"] / entry["LibraryPath"]
-        headers = path / entry["LibraryIdentifier"] / entry["HeadersPath"]
-        if library.suffix != ".a" or not library.is_file() or not headers.is_dir():
-            raise ValueError(f"Missing static library or headers in {path.name}")
-        required_headers = ["module.modulemap", *PRODUCTS[name]["headers"],
+        # Xcode stages raw-library HeadersPath contents into a shared include
+        # directory. A product-named framework keeps overlapping upstream headers
+        # and module.modulemap paths isolated when consumers link multiple targets.
+        if "HeadersPath" in entry or entry["LibraryPath"] != f"{name}.framework":
+            raise ValueError(f"{path.name} must contain named framework bundles without HeadersPath")
+        framework = path / entry["LibraryIdentifier"] / entry["LibraryPath"]
+        headers = framework / "Headers"
+        if not (framework / name).is_file() or not headers.is_dir():
+            raise ValueError(f"Missing framework library or headers in {path.name}")
+        with (framework / "Info.plist").open("rb") as stream:
+            bundle_info = plistlib.load(stream)
+        if bundle_info.get("CFBundlePackageType") != "FMWK" or bundle_info.get("CFBundleExecutable") != name:
+            raise ValueError(f"Invalid named framework bundle in {path.name}")
+        module_map = framework / "Modules" / "module.modulemap"
+        if not module_map.is_file() or not re.search(
+                rf"^\s*framework\s+module\s+{re.escape(name)}\s*(?:\[system\]\s*)?\{{", module_map.read_text()):
+            raise ValueError(f"{path.name} is missing its named framework module map")
+        required_headers = [*PRODUCTS[name]["headers"],
                             *(f"webp/{header}" for header in PRODUCTS[name]["headers"])]
         for header in required_headers:
             if not (headers / header).is_file():
@@ -137,8 +150,12 @@ def zip_framework(path, output):
 
 
 def validate_provenance(provenance):
-    if provenance.get("schema") != 1 or provenance.get("libwebp") != LOCK["libwebp"]:
+    if provenance.get("schema") != 2 or provenance.get("libwebp") != LOCK["libwebp"]:
         raise ValueError("build-info.json does not match the pinned libwebp source")
+    if provenance.get("package_version") != LOCK["package_version"]:
+        raise ValueError("build-info.json does not match the pinned package version")
+    if provenance.get("packaging") != "static-framework-v1":
+        raise ValueError("build-info.json does not use named static framework packaging")
     if provenance.get("toolchain_override") is not False:
         raise ValueError("Development toolchain overrides cannot be released")
     if set(provenance.get("slices", [])) != set(SLICES):

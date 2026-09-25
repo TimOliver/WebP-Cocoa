@@ -1,0 +1,177 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+		000000000000000000000001 = {
+			isa = PBXProject;
+			attributes = { LastUpgradeCheck = 2630; };
+			buildConfigurationList = 000000000000000000000002;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = 000000000000000000000004;
+			packageReferences = (000000000000000000000008);
+			productRefGroup = 000000000000000000000005;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (000000000000000000000010, 000000000000000000000020);
+		};
+		000000000000000000000002 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (000000000000000000000003);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		000000000000000000000003 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		000000000000000000000004 = {
+			isa = PBXGroup;
+			children = (000000000000000000000006, 000000000000000000000005);
+			sourceTree = "<group>";
+		};
+		000000000000000000000005 = {
+			isa = PBXGroup;
+			children = (000000000000000000000007, 000000000000000000000009);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		000000000000000000000006 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = SmokeApp.swift;
+			sourceTree = "<group>";
+		};
+		000000000000000000000007 = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = DecodingSmoke.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		000000000000000000000008 = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../..";
+		};
+		000000000000000000000009 = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = FullSmoke.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		000000000000000000000010 = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000011;
+			buildPhases = (000000000000000000000013, 000000000000000000000014);
+			buildRules = ();
+			dependencies = ();
+			name = DecodingSmoke;
+			packageProductDependencies = (000000000000000000000017);
+			productName = DecodingSmoke;
+			productReference = 000000000000000000000007;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000000011 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (000000000000000000000012);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		000000000000000000000012 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.webpcocoa.tests.DecodingSmoke;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		000000000000000000000013 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (000000000000000000000015);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000014 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (000000000000000000000016);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000015 = { isa = PBXBuildFile; fileRef = 000000000000000000000006; };
+		000000000000000000000016 = { isa = PBXBuildFile; productRef = 000000000000000000000017; };
+		000000000000000000000017 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 000000000000000000000008;
+			productName = WebPDecoding;
+		};
+		000000000000000000000020 = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000021;
+			buildPhases = (000000000000000000000023, 000000000000000000000024);
+			buildRules = ();
+			dependencies = ();
+			name = FullSmoke;
+			packageProductDependencies = (000000000000000000000027);
+			productName = FullSmoke;
+			productReference = 000000000000000000000009;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000000021 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (000000000000000000000022);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		000000000000000000000022 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = org.webpcocoa.tests.FullSmoke;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = WEBP_FULL;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		000000000000000000000023 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (000000000000000000000025);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000024 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (000000000000000000000026);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000025 = { isa = PBXBuildFile; fileRef = 000000000000000000000006; };
+		000000000000000000000026 = { isa = PBXBuildFile; productRef = 000000000000000000000027; };
+		000000000000000000000027 = {
+			isa = XCSwiftPackageProductDependency;
+			package = 000000000000000000000008;
+			productName = WebPFull;
+		};
+	};
+	rootObject = 000000000000000000000001;
+}

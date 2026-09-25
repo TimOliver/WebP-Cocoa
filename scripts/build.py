@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import plistlib
 import shlex
 import shutil
 import subprocess
@@ -178,14 +179,50 @@ def stage_headers(source, name, product):
         shutil.copyfile(source / "src" / "webp" / header, headers / header)
         (headers / "webp" / header).write_text(f'#include "../{header}"\n')
     if name == "WebP":
-        module = ('module WebP [system] {\n  header "encode.h"\n  header "types.h"\n'
+        module = ('framework module WebP [system] {\n  header "encode.h"\n  header "types.h"\n'
                   '  export *\n  module Decoder {\n    header "decode.h"\n    export *\n  }\n}\n')
     else:
-        module = f"module {name} [system] {{\n"
+        module = f"framework module {name} [system] {{\n"
         module += "".join(f'  header "{header}"\n' for header in product["headers"])
         module += "  export *\n}\n"
     (headers / "module.modulemap").write_text(module)
     return headers
+
+
+def stage_framework(source, name, product, slice_name, headers):
+    """Keep every product's headers/modules inside its own Xcode namespace.
+
+    Raw -library/-headers XCFrameworks all stage into Xcode's shared include/
+    directory. Named frameworks instead stage as NAME.framework, even when
+    their underlying libraries export identically named upstream C headers.
+    """
+    framework = BUILD / "frameworks" / slice_name / f"{name}.framework"
+    if framework.exists():
+        shutil.rmtree(framework)
+    framework.mkdir(parents=True)
+    shutil.copytree(headers, framework / "Headers")
+    (framework / "Modules").mkdir()
+    (framework / "Headers" / "module.modulemap").replace(framework / "Modules" / "module.modulemap")
+    archive = BUILD / "slices" / slice_name / name / f"lib{product['library']}.a"
+    shutil.copyfile(archive, framework / name)
+    platforms = {
+        "macosx": "MacOSX", "iphoneos": "iPhoneOS", "iphonesimulator": "iPhoneSimulator",
+        "appletvos": "AppleTVOS", "appletvsimulator": "AppleTVSimulator",
+        "watchos": "WatchOS", "watchsimulator": "WatchSimulator",
+        "xros": "XROS", "xrsimulator": "XRSimulator",
+    }
+    sdk = SLICES[slice_name]["sdk"]
+    info = {
+        "CFBundleDevelopmentRegion": "en", "CFBundleExecutable": name,
+        "CFBundleIdentifier": f"org.webmproject.webp-cocoa.{name}",
+        "CFBundleInfoDictionaryVersion": "6.0", "CFBundleName": name,
+        "CFBundlePackageType": "FMWK", "CFBundleShortVersionString": LOCK["package_version"],
+        "CFBundleVersion": LOCK["package_version"],
+        "CFBundleSupportedPlatforms": [platforms[sdk]],
+        "MinimumOSVersion": deployment(slice_name),
+    }
+    (framework / "Info.plist").write_bytes(plistlib.dumps(info))
+    return framework
 
 
 def create_xcframeworks(source, selected):
@@ -197,8 +234,8 @@ def create_xcframeworks(source, selected):
         headers = stage_headers(source, name, product)
         args = ["xcodebuild", "-create-xcframework"]
         for slice_name in selected:
-            archive = BUILD / "slices" / slice_name / name / f"lib{product['library']}.a"
-            args += ["-library", archive, "-headers", headers]
+            framework = stage_framework(source, name, product, slice_name, headers)
+            args += ["-framework", framework]
         run([*args, "-output", output], log=BUILD / "logs" / f"{name}-xcframework.log")
         licenses = output / "Licenses"
         licenses.mkdir()
@@ -235,7 +272,8 @@ def main():
     for name in selected:
         build_slice(source, name, args.jobs)
     create_xcframeworks(source, selected)
-    info = {"schema": 1, "libwebp": LOCK["libwebp"], "tools": tools,
+    info = {"schema": 2, "packaging": "static-framework-v1", "package_version": LOCK["package_version"],
+            "libwebp": LOCK["libwebp"], "tools": tools,
             "toolchain_override": args.allow_toolchain_mismatch, "slices": selected,
             "deployment": LOCK["deployment"], "architecture_deployment": LOCK["architecture_deployment"],
             "products": list(PRODUCTS),

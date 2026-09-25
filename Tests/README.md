@@ -7,7 +7,7 @@ is a development-only shortcut; release CI must run the SwiftPM consumer.
 The runner checks each product's XCFramework platform/variant declarations,
 exact architecture lists, static archive signatures, Mach-O build platform and
 deployment minimum, symbol separation (including decoder-only purity and bundled
-SharpYUV), absence of embedded bitcode, headers and module maps. It compiles **and links**
+SharpYUV), absence of embedded bitcode, headers and module maps inside distinct named static frameworks. It compiles **and links**
 C upstream-style includes, Objective-C modules, and Swift imports for every
 advertised platform/architecture, for both the decoder+demux and full+demux+mux
 library combinations. This includes the historical `WebP.Decoder` module and
@@ -27,3 +27,10 @@ macOS architecture is cross-linked. No simulator installation or device boot is
 required. All outputs and compiler/SwiftPM caches remain under `build/tests/`;
 failed runs are retained for inspection. The synthetic fixtures and reproduction
 instructions are documented in [Fixtures/README.md](Fixtures/README.md).
+
+Run `python3 scripts/test-xcode-consumer.py` for the Xcode staging regression.
+It builds real iOS app targets with SwiftPM product dependencies for generic
+device and simulator destinations, checking `ProcessXCFramework` and linking
+both decoding and full-codec combinations. It accepts `--package PATH` for an
+extracted release or a package manifest with remote binary URLs. No booted
+simulator or signing identity is required.

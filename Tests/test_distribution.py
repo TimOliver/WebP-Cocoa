@@ -28,7 +28,7 @@ class ReleaseWorkflowTests(unittest.TestCase):
     def test_workflow_validates_and_exports_prefixed_tag(self):
         script = textwrap.dedent(self.workflow.split("python3 - <<'PY'\n", 1)[1]
                                  .split("\n          PY", 1)[0])
-        tag = f"v{LOCK['libwebp']['version']}"
+        tag = f"v{LOCK['package_version']}"
         cases = [("push", "", True), ("pull_request", "", True),
                  ("workflow_dispatch", tag, True),
                  ("workflow_dispatch", tag[1:], False),
@@ -54,6 +54,23 @@ class ReleaseWorkflowTests(unittest.TestCase):
         self.assertIn('--tag "$RELEASE_TAG" --target "$RELEASE_COMMIT" --title "$RELEASE_TAG"',
                       self.workflow)
 
+    def test_xcode_consumer_gates_packaging_and_draft_publication(self):
+        build_test = self.workflow.index("run: python3 scripts/test-xcode-consumer.py\n")
+        package = self.workflow.index("python3 scripts/distribution.py package")
+        downloaded_test = self.workflow.index('python3 scripts/test-xcode-consumer.py --package "$RUNNER_TEMP/release-consumer"')
+        publish = self.workflow.index('gh release edit "$CANDIDATE_TAG"')
+        public_test = self.workflow.index('python3 scripts/test-xcode-consumer.py --package "$GITHUB_WORKSPACE"')
+        self.assertLess(build_test, package)
+        self.assertLess(package, downloaded_test)
+        self.assertLess(downloaded_test, publish)
+        self.assertLess(publish, public_test)
+
+    def test_publishing_refuses_existing_tags_and_never_replaces_assets(self):
+        self.assertIn('git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"', self.workflow)
+        self.assertIn('git ls-remote --tags origin "refs/tags/$RELEASE_TAG"', self.workflow)
+        self.assertNotIn("--clobber", self.workflow)
+        self.assertNotIn("--force", self.workflow)
+
 
 class ReleaseTests(unittest.TestCase):
     def setUp(self):
@@ -63,7 +80,7 @@ class ReleaseTests(unittest.TestCase):
         self.dist = self.root / "dist"
         self.dist.mkdir()
         self.lock = copy.deepcopy(LOCK)
-        self.tag = f"v{self.lock['libwebp']['version']}"
+        self.tag = f"v{self.lock['package_version']}"
         self.repository = "FixtureOwner/WebP-Cocoa"
         for name, value in (("ROOT", self.root), ("DIST", self.dist), ("LOCK", self.lock)):
             patcher = mock.patch.object(distribution, name, value)
@@ -76,18 +93,23 @@ class ReleaseTests(unittest.TestCase):
             libraries = []
             for slice_name, spec in SLICES.items():
                 directory = framework / slice_name
-                headers = directory / "Headers"
+                bundle = directory / f"{name}.framework"
+                headers = bundle / "Headers"
                 (headers / "webp").mkdir(parents=True)
-                library_name = f"lib{product['library']}.a"
                 # Archive signature only: real object/platform checks are compiler tests.
-                (directory / library_name).write_bytes(b"!<arch>\n")
+                (bundle / name).write_bytes(b"!<arch>\n")
                 for header in product["headers"]:
                     (headers / header).write_text(f"/* {header} */\n")
                     (headers / "webp" / header).write_text(f'#include "../{header}"\n')
-                (headers / "module.modulemap").write_text(f'module {name} {{ header "{product["headers"][0]}" export * }}\n')
+                (bundle / "Modules").mkdir()
+                (bundle / "Modules/module.modulemap").write_text(
+                    f'framework module {name} [system] {{ header "{product["headers"][0]}" export * }}\n')
+                (bundle / "Info.plist").write_bytes(plistlib.dumps({
+                    "CFBundlePackageType": "FMWK", "CFBundleExecutable": name,
+                }))
                 entry = {
-                    "LibraryIdentifier": slice_name, "LibraryPath": library_name,
-                    "HeadersPath": "Headers", "SupportedArchitectures": spec["archs"],
+                    "LibraryIdentifier": slice_name, "LibraryPath": f"{name}.framework",
+                    "SupportedArchitectures": spec["archs"],
                     "SupportedPlatform": spec["platform"],
                 }
                 if "variant" in spec:
@@ -101,7 +123,8 @@ class ReleaseTests(unittest.TestCase):
             for license_name in ("COPYING", "PATENTS", "AUTHORS", "WebP-Cocoa-LICENSE"):
                 (framework / "Licenses" / license_name).write_text(f"license {license_name}\n")
         self.provenance = {
-            "schema": 1, "libwebp": self.lock["libwebp"], "toolchain_override": False,
+            "schema": 2, "libwebp": self.lock["libwebp"], "toolchain_override": False,
+            "package_version": self.lock["package_version"], "packaging": "static-framework-v1",
             "slices": list(SLICES), "deployment": self.lock["deployment"], "products": list(PRODUCTS),
             "architecture_deployment": self.lock["architecture_deployment"],
             "tools": {key: value for key, value in self.lock["tools"].items() if key != "sdk"},
@@ -166,7 +189,20 @@ class ReleaseTests(unittest.TestCase):
 
     def test_accepts_v_prefixed_pinned_tag(self):
         self.assertEqual(distribution.validate_tag(self.tag), self.tag)
-        self.assertEqual(self.lock["libwebp"]["version"], self.tag[1:])
+        self.assertEqual(self.lock["package_version"], self.tag[1:])
+
+    def test_package_version_can_advance_without_changing_upstream_source(self):
+        upstream = copy.deepcopy(self.lock["libwebp"])
+        self.lock["package_version"] = "9.8.7"
+        self.assertEqual(distribution.validate_tag("v9.8.7"), "v9.8.7")
+        with self.assertRaisesRegex(ValueError, "package version"):
+            distribution.validate_tag(f"v{upstream['version']}")
+        self.provenance["package_version"] = "9.8.7"
+        distribution.validate_provenance(self.provenance)
+        self.assertEqual(self.provenance["libwebp"], upstream)
+        checksums = {name: "a" * 64 for name in PRODUCTS}
+        manifest = distribution.manifest(tag="v9.8.7", checksums=checksums)
+        self.assertIn("/releases/download/v9.8.7/", manifest)
 
     def test_rejects_invalid_or_unpinned_tags_before_packaging(self):
         for tag in (self.tag[1:], f"v{self.tag}", self.tag.upper(), "v0.0.0",
@@ -184,7 +220,8 @@ class ReleaseTests(unittest.TestCase):
 
     def test_rejects_override_and_mismatched_toolchain(self):
         original = copy.deepcopy(self.provenance)
-        for change in ("override", "python", "sdk", "missing-sdk", "missing-slice", "architecture-deployment"):
+        for change in ("override", "python", "sdk", "missing-sdk", "missing-slice",
+                       "architecture-deployment", "schema", "packaging", "package-version"):
             with self.subTest(change=change):
                 self.provenance = copy.deepcopy(original)
                 if change == "override":
@@ -197,8 +234,14 @@ class ReleaseTests(unittest.TestCase):
                     self.provenance["tools"]["sdks"].pop("iphoneos")
                 elif change == "missing-slice":
                     self.provenance["slices"].pop()
-                else:
+                elif change == "architecture-deployment":
                     self.provenance["architecture_deployment"] = {}
+                elif change == "schema":
+                    self.provenance["schema"] = 1
+                elif change == "packaging":
+                    self.provenance["packaging"] = "raw-static-library"
+                else:
+                    self.provenance["package_version"] = "0.0.0"
                 self.write_provenance()
                 with self.assertRaises(ValueError):
                     self.package()
@@ -215,10 +258,11 @@ class ReleaseTests(unittest.TestCase):
 
     def test_rejects_missing_licenses_or_import_headers(self):
         framework = self.dist / "WebPDecoder.xcframework"
+        bundle = framework / "ios/WebPDecoder.framework"
         required = [framework / "Licenses" / name for name in (
             "COPYING", "PATENTS", "AUTHORS", "WebP-Cocoa-LICENSE")]
-        required += [framework / "ios" / "Headers" / name for name in (
-            "module.modulemap", "decode.h", "webp/decode.h")]
+        required += [bundle / "Headers" / name for name in ("decode.h", "webp/decode.h")]
+        required += [bundle / "Modules/module.modulemap", bundle / "WebPDecoder"]
         for file in required:
             with self.subTest(file=file.relative_to(framework)):
                 original = file.read_bytes()
@@ -229,6 +273,46 @@ class ReleaseTests(unittest.TestCase):
                     self.assertFalse((self.dist / "release").exists())
                 finally:
                     file.write_bytes(original)
+
+    def test_rejects_raw_library_headers_that_collide_when_xcode_stages_targets(self):
+        framework = self.dist / "WebPDecoder.xcframework"
+        plist = framework / "Info.plist"
+        info = plistlib.loads(plist.read_bytes())
+        entry = info["AvailableLibraries"][0]
+        entry.update({"LibraryPath": "libwebpdecoder.a", "HeadersPath": "Headers"})
+        plist.write_bytes(plistlib.dumps(info))
+        with self.assertRaisesRegex(ValueError, "named framework bundles without HeadersPath"):
+            self.package()
+
+    def test_rejects_shared_framework_names_and_external_headers(self):
+        plist = self.dist / "WebPDemux.xcframework/Info.plist"
+        original = plist.read_bytes()
+        for change in ("shared-name", "external-headers"):
+            with self.subTest(change=change):
+                info = plistlib.loads(original)
+                entry = info["AvailableLibraries"][0]
+                if change == "shared-name":
+                    entry["LibraryPath"] = "WebPDecoder.framework"
+                else:
+                    entry["HeadersPath"] = "Headers"
+                plist.write_bytes(plistlib.dumps(info))
+                with self.assertRaisesRegex(ValueError, "named framework bundles without HeadersPath"):
+                    self.package()
+
+    def test_rejects_mismatched_framework_executable_and_module(self):
+        bundle = self.dist / "WebPDemux.xcframework/ios/WebPDemux.framework"
+        plist = bundle / "Info.plist"
+        original = plist.read_bytes()
+        info = plistlib.loads(original)
+        info["CFBundleExecutable"] = "WebPDecoder"
+        plist.write_bytes(plistlib.dumps(info))
+        with self.assertRaisesRegex(ValueError, "Invalid named framework"):
+            self.package()
+        plist.write_bytes(original)
+        module_map = bundle / "Modules/module.modulemap"
+        module_map.write_text('module WebPDemux { header "demux.h" export * }\n')
+        with self.assertRaisesRegex(ValueError, "named framework module map"):
+            self.package()
 
     def test_rejects_archive_tampering(self):
         release = self.package()

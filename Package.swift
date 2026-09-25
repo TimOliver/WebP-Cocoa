@@ -18,9 +18,17 @@ let package = Package(
         .library(name: "WebPFull", targets: ["WebP", "WebPDemux", "WebPMux"]),
     ],
     targets: [
-        .binaryTarget(name: "WebP", path: "dist/WebP.xcframework"),
-        .binaryTarget(name: "WebPDecoder", path: "dist/WebPDecoder.xcframework"),
-        .binaryTarget(name: "WebPDemux", path: "dist/WebPDemux.xcframework"),
-        .binaryTarget(name: "WebPMux", path: "dist/WebPMux.xcframework"),
+        .binaryTarget(name: "WebP",
+                      url: "https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.6.1/WebP.xcframework.zip",
+                      checksum: "b5b68948c318fd0b4ceb365a7774f3e5bf8e32509f95b9d50dc9543ae411bb8a"),
+        .binaryTarget(name: "WebPDecoder",
+                      url: "https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.6.1/WebPDecoder.xcframework.zip",
+                      checksum: "af60e7ac16eed7c1c01bca7646ac46bf96c13286c55bd8e6118f14184338fbf1"),
+        .binaryTarget(name: "WebPDemux",
+                      url: "https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.6.1/WebPDemux.xcframework.zip",
+                      checksum: "2384c6db3edae277653bc0803cd940115b0d1a9ddf3f9d287c2edd1fcf26ebca"),
+        .binaryTarget(name: "WebPMux",
+                      url: "https://github.com/TimOliver/WebP-Cocoa/releases/download/v1.6.1/WebPMux.xcframework.zip",
+                      checksum: "0316928ce9075e434c05c97a3cefce16cdbe5bbbf13c59481fdc3167c97bab2d"),
     ]
 )
